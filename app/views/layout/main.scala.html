@@ -1,0 +1,63 @@
+@(clazz: String = null)(body: Html)(implicit request: DashRequest[_])
+
+@menuItem(path: String, icon: String, label: String = null, secure: Boolean = true) = {
+@if(!secure || request.authenticated) {
+    <li @if(request.path.startsWith(path)) {
+        class="active" }>
+        <a href="@path"><i class="material-icons">@icon</i>@if(label != null) {
+            <span>@label</span>
+        }</a>
+    </li>
+}
+}
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+
+<title>From Scratch</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="@routes.Assets.versioned("stylesheets/dash.css")" rel="stylesheet">
+<link href="@routes.Assets.versioned("fonts/stylesheet.css")" rel="stylesheet">
+
+<script>var whTooltips = { colorLinks: true, iconizeLinks: true, renameLinks: true };</script>
+<script src="https://wow.zamimg.com/widgets/power.js" defer></script>
+
+<script src="@routes.Assets.versioned("javascripts/jquery.min.js")" defer></script>
+<script src="@routes.Assets.versioned("javascripts/autosize.min.js")" defer></script>
+<script src="@routes.Assets.versioned("javascripts/selectize.min.js")" defer></script>
+<script src="@routes.Assets.versioned("javascripts/cleave.min.js")" defer></script>
+<script src="@routes.Assets.versioned("javascripts/dash.js")" defer></script>
+
+<header>
+    <h1>Dash</h1>
+    <nav>
+        <ul>
+            @menuItem("/dkp", "account_balance", "DKP", secure = false)
+            @*
+            @menuItem("/roster", "supervisor_account", "Roster")
+            @menuItem("/dashboard", "apps")
+            @menuItem("/attendance", "event", "Attendance")
+            @menuItem("/import", "cloud_upload")
+            *@
+        </ul>
+    </nav>
+    @if(request.authenticated) {
+        <div class="user">
+            @if(request.user.avatar.isDefined) {
+                <img src="https://cdn.discordapp.com/avatars/@request.user.id/@{
+                    request.user.avatar.get
+                }.png?size=128">
+            }
+            <span>@request.user.username</span>
+            <a href="@routes.LoginController.logout()"><i class="material-icons">close</i></a>
+        </div>
+    } else {
+        <a class="auth" href="@request.authLink"><i class="material-icons">security</i></a>
+    }
+</header>
+
+@if(clazz != null) {
+    <main class="@clazz">@body</main>
+} else {
+    <main>@body</main>
+}
+

@@ -1,0 +1,19 @@
+[Unit]
+Description=Traefik
+After=docker.service
+
+[Service]
+Restart=always
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker stop traefik
+ExecStartPre=-/usr/bin/docker rm traefik
+ExecStartPre=/usr/bin/docker pull traefik:1.7
+ExecStart=/usr/bin/docker run --name traefik -p 8080:8080 -p 80:80 -p 443:443 \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /opt/traefik/traefik.toml:/traefik.toml \
+        -v /opt/traefik/acme.json:/acme.json \
+        traefik:1.7
+ExecStop=/usr/bin/docker stop traefik
+
+[Install]
+WantedBy=multi-user.target

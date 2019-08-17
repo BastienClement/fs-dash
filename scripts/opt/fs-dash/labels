@@ -1,0 +1,4 @@
+traefik.domain=fromscratch.gg
+traefik.enable=true
+traefik.port=9000
+traefik.frontend.headers.customRequestHeaders=X-Forwarded-Proto:https

@@ -1,0 +1,14 @@
+@(title: String, description: Option[String])(implicit request: DashRequest[_])
+
+@layout.main("error") {
+    <article class="error">
+        <header>
+            <h2>@title</h2>
+        </header>
+        <main>
+        @if(description.isDefined) {
+            <p>@description</p>
+        }
+        </main>
+    </article>
+}

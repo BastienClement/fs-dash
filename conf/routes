@@ -1,0 +1,26 @@
+GET         /                              controllers.HomeController.index
+GET         /snowflake                     controllers.HomeController.snowflake
+
+### Auth  ###
+
+GET         /auth/authorize                controllers.LoginController.authorize
+GET         /auth/logout                   controllers.LoginController.logout
+
+### DPK ###
+
+GET         /dkp                           controllers.DkpController.index
+
+GET         /dkp/create-account            controllers.DkpController.createAccount
+POST        /dkp/create-account            controllers.DkpController.createAccountPost
+
+GET         /dkp/account/:id               controllers.DkpController.account(id: model.Snowflake, date: Option[Long] ?= None)
+
+GET         /dkp/create-transaction        controllers.DkpController.createTransaction
+POST        /dkp/create-transaction        controllers.DkpController.createTransactionPost
+
+GET         /dkp/transaction/:id           controllers.DkpController.transaction(id: model.Snowflake)
+POST        /dkp/transaction/:id           controllers.DkpController.transactionPost(id: model.Snowflake)
+
+### Static Assets ###
+
+GET         /assets/*file                  controllers.Assets.versioned(path="/public", file: Asset)

@@ -1,0 +1,117 @@
+@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, previous: Long, next: Long,month:String)(implicit request: DashRequest[_])
+
+@layout.main("dkp-account") {
+    <article class="account-details">
+        <header>
+            <h3>@account.label <span class="id">#@account.id</span></h3>
+            <div>
+                <a href="@routes.DkpController.account(account.id, Some(previous))"><i class="material-icons">chevron_left</i></a>@month
+                <a href="@routes.DkpController.account(account.id, Some(next))"><i class="material-icons">chevron_right</i></a>
+            </div>
+        </header>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="fit"></th>
+                        <th class="fit">Date</th>
+                        <th style="width: 17%;">Transaction</th>
+                        <th style="width: 30%">Label</th>
+                        <th class="center">Item</th>
+                        <th class="right">Débit</th>
+                        <th class="right">Crédit</th>
+                        <th class="right">Solde</th>
+                    </tr>
+                </thead>
+                <tbody class="with-details">
+                    @for(DkpController.DetailedMovement(movement, transaction, author) <- movements) {
+                        <tr>
+                            <td class="details-toggle">
+                                <i class="material-icons show">keyboard_arrow_right</i>
+                                <i class="material-icons hide">keyboard_arrow_down</i>
+                            </td>
+                            <td>@movement.humanDate</td>
+                            <td>
+                            @transaction.map { t =>
+                                <a href="@routes.DkpController.transaction(t.id)" class="link">
+                                @t.label
+                                </a>
+                            }
+                            </td>
+                            <td>
+                                @movement.label
+                                @if(!movement.details.isBlank) {
+                                    <i class="material-icons has-details" title="Des détails sont disponibles pour ce mouvement">short_text</i>
+                                }
+                            </td>
+                            <td class="center">@movement.itemLink</td>
+                            <td class="right">
+                            @if(movement.amount.value < 0) {
+                                @movement.amount.abs
+                            }
+                            </td>
+                            <td class="right">
+                            @if(movement.amount.value > 0) {
+                                @movement.amount.abs
+                            }
+                            </td>
+                            <td class="right">@movement.balance</td>
+                        </tr>
+                        <tr class="details">
+                            <td colspan="8">
+                                <table class="inner">
+                                    <tr>
+                                        <th>Mouvement</th>
+                                        <td class="id">@movement.id</td>
+                                        <th>Auteur</th>
+                                        <td>@author.username</td>
+                                        <th>Détails</th>
+                                        <td rowspan="2" class="text">
+                                        @if(movement.details.isBlank) {
+                                            –
+                                        } else {
+                                            <p>@movement.details.trim</p>
+                                        }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Transaction</th>
+                                        <td class="id">@transaction.map(_.id.toString).getOrElse("–")</td>
+                                        <th>Item</th>
+                                        <td>
+                                        @if(movement.item.isEmpty) {
+                                            –
+                                        } else {
+                                            @movement.itemLink
+                                        }
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    }
+                    @if(movements.isEmpty) {
+                        <tr>
+                            <td colspan="8">
+                                Aucun mouvement sur la période.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="5" class="right">Total des mouvements</th>
+                        <td class="right">@movements.map(m => m.movement).filter(m => m.amount.value < 0).map(m => m.amount).sum.abs</td>
+                        <td class="right">@movements.map(m => m.movement).filter(m => m.amount.value > 0).map(m => m.amount).sum.abs</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th colspan="5" class="right">Solde final</th>
+                        <td colspan="3" class="right">@balance</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </article>
+}

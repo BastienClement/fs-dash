@@ -1,0 +1,147 @@
+/* SF Pro Display */
+
+@font-face {
+	font-family: 'SF Pro Display';
+	src: url('SFProDisplay-Light.woff2') format('woff2');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Display';
+	src: url('SFProDisplay-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Display';
+	src: url('SFProDisplay-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Display';
+	src: url('SFProDisplay-Semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Display';
+	src: url('SFProDisplay-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+}
+
+/* SF Pro Text */
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('SFProText-Light.woff2') format('woff2');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('SFProText-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('SFProText-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('SFProText-Semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Pro Text';
+	src: url('SFProText-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+}
+
+/* SF Compact Display */
+
+@font-face {
+	font-family: 'SF Compact Display';
+	src: url('SFCompactDisplay-Light.woff2') format('woff2');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Display';
+	src: url('SFCompactDisplay-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Display';
+	src: url('SFCompactDisplay-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Display';
+	src: url('SFCompactDisplay-Semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Display';
+	src: url('SFCompactDisplay-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+}
+
+/* SF Compact Text */
+
+@font-face {
+	font-family: 'SF Compact Text';
+	src: url('SFCompactText-Light.woff2') format('woff2');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Text';
+	src: url('SFCompactText-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Text';
+	src: url('SFCompactText-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Text';
+	src: url('SFCompactText-Semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SF Compact Text';
+	src: url('SFCompactText-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+}

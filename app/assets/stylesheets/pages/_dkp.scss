@@ -1,0 +1,155 @@
+body > main.dkp {
+	.accounts {
+		main {
+			display: flex;
+			flex-wrap: wrap;
+			flex-direction: row;
+
+			& > * {
+				flex: 1;
+				min-width: 350px;
+			}
+		}
+	}
+
+	.account a {
+		display: flex;
+		align-items: center;
+		padding: 8px;
+		border: 1px solid #ffffff10;
+		margin: 4px;
+
+		aside {
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+			margin-right: 16px;
+
+			span.id {
+				font-family: "SF Compact Text", sans-serif;
+				font-weight: 300;
+				font-size: 0.7em;
+				opacity: .5;
+			}
+
+			span.label {
+				margin-bottom: 2px;
+				font-size: 1.2em;
+			}
+		}
+
+		i.material-icons {
+			opacity: .5;
+			font-size: 16px;
+			vertical-align: middle;
+			border: 2px solid rgba(255, 255, 255, 0.5);
+			border-radius: 100%;
+			padding: 3px;
+			margin-right: 16px;
+		}
+
+		.amount {
+			white-space: nowrap;
+			font-size: 1.6em;
+			font-family: "SF Pro Display", sans-serif;
+			padding: 0 8px;
+		}
+	}
+
+	.operations {
+		nav {
+			display: flex;
+			flex-direction: column;
+
+			a {
+				padding: 8px;
+				white-space: nowrap;
+
+				&:hover {
+					background-color: #ffffff05;
+				}
+
+				i {
+					margin-right: 8px;
+				}
+			}
+		}
+	}
+}
+
+body > main.dkp-transaction {
+	max-width: 1700px;
+
+	.transaction-details {
+		max-width: 1200px;
+		width: 100%;
+	}
+
+	.add-movement {
+		flex: 1;
+	}
+}
+
+body > main.dkp-account {
+	.account-details {
+		max-width: 1200px;
+		flex: 1;
+
+		header input.datepicker {
+			background: none;
+			border: 0;
+			font-family: "SF Pro Display", sans-serif;
+			font-size: 14px;
+			font-weight: 500;
+			text-align: right;
+			color: #eee;
+			width: 200px;
+			opacity: .5;
+			outline: 0;
+		}
+
+		i.has-details {
+			font-size: 14px;
+			vertical-align: middle;
+			margin-left: 8px;
+			opacity: .5;
+		}
+
+		tr.details table {
+			width: 100%;
+			border-collapse: collapse;
+
+			tr:first-child {
+				height: 1em;
+			}
+
+			th, td {
+				padding: 0 24px 4px 8px;
+				vertical-align: top;
+				white-space: nowrap;
+				font-weight: 300;
+			}
+
+			th {
+				opacity: .5;
+				padding-right: 8px;
+			}
+
+			td.id {
+				font-family: "SF Compact Text", sans-serif;
+			}
+
+			th {
+				text-align: right;
+			}
+
+			th:first-child {
+				width: 1%;
+			}
+
+			td.text {
+				width: 100%;
+			}
+		}
+	}
+}

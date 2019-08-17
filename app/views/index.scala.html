@@ -1,0 +1,48 @@
+@(message: String)(implicit request: DashRequest[_])
+
+@layout.main("dkp") {
+    <article class="balance">
+        <h3>Balance actuelle</h3>
+        <p>485.20 <span>DKP</span></p>
+    </article>
+
+    <article>
+        <header>
+            <h3>Transactions</h3>
+        </header>
+        <table class="dkp-history">
+            <tr>
+                <th></th>
+                <th>Date</th>
+                <th>Label</th>
+                <th>Debit</th>
+                <th>Crédit</th>
+                <th>Balance</th>
+            </tr>
+            @for(i <- 1 to 5) {
+                <tr>
+                    <td><i class="material-icons">keyboard_arrow_right</i></td>
+                    <td>05.08.2019</td>
+                    <td>Participation au raid</td>
+                    <td></td>
+                    <td>20.00</td>
+                    <td>458.02</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">keyboard_arrow_right</i></td>
+                    <td>05.08.2019</td>
+                    <td>Buy</td>
+                    <td>50.21</td>
+                    <td></td>
+                    <td>458.02</td>
+                </tr>
+            }
+            <tr>
+                <td colspan="3"></td>
+                <td>562.20</td>
+                <td>712.10</td>
+                <td>548.02</td>
+            </tr>
+        </table>
+    </article>
+}

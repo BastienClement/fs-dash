@@ -1,0 +1,18 @@
+[Unit]
+Description=Dash
+After=docker.service
+
+[Service]
+Restart=always
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker stop dash
+ExecStartPre=-/usr/bin/docker rm dash
+ExecStartPre=/usr/bin/docker pull galedric/fs-dash:latest
+ExecStart=/usr/bin/docker run --name dash \
+        --env-file /opt/fs-dash/env \
+        --label-file /opt/fs-dash/labels \
+        galedric/fs-dash:latest
+ExecStop=/usr/bin/docker stop dash
+
+[Install]
+WantedBy=multi-user.target

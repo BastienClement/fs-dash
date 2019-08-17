@@ -1,0 +1,19 @@
+@(createAccountForm: Form[DkpController.CreateAccount])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
+
+@import helper._
+
+@layout.main("dkp-create-account") {
+    <article>
+        <header>
+            <h3>Créer un compte</h3>
+        </header>
+        @helper.form(action = routes.DkpController.createAccountPost()) {
+            @CSRF.formField
+            @helper.inputText(createAccountForm("label"), 'autofocus -> true)
+            @helper.checkbox(createAccountForm("enable-decay"))
+            <div class="actions">
+                <button type="submit">Créer</button>
+            </div>
+        }
+    </article>
+}

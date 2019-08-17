@@ -1,0 +1,66 @@
+@(transaction: Transaction, movements: Seq[(Movement, Account)], addMovementForm: Form[DkpController.AddMovement], accounts: Seq[(String, String)])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
+
+@layout.main("dkp-transaction") {
+    <article class="transaction-details">
+        <header>
+            <h3>
+                @transaction.label
+                <span class="id">#@transaction.id</span>
+            </h3>
+        </header>
+        <main>
+            <p>@transaction.details.trim</p>
+        </main>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="5">Mouvements</th>
+                    </tr>
+                    <tr>
+                        <th class="fit">Date</th>
+                        <th style="width: 15%;">Compte</th>
+                        <th style="width: 50%">Label</th>
+                        <th class="center">Item</th>
+                        <th class="right">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for((movement, account) <- movements) {
+                    <tr>
+                        <td>@movement.humanDate</td>
+                        <td><a href="@routes.DkpController.account(account.id)" class="link">@account.label</a></td>
+                        <td>@movement.label</td>
+                        <td class="center">@movement.itemLink</td>
+                        <td class="right">@movement.amount.signed</td>
+                    </tr>
+                }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="right">Total</th>
+                        <td class="right">@movements.map(m => m._1.amount).sum.signed</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </article>
+    @if(request.authenticated && request.user.isOfficer) {
+        <article class="add-movement">
+            <header>
+                <h3>Ajouter un mouvement</h3>
+            </header>
+            @helper.form(action = routes.DkpController.transactionPost(transaction.id)) {
+                @helper.CSRF.formField
+                @helper.select(addMovementForm("accounts"), accounts, 'multiple -> true)
+                @helper.inputText(addMovementForm("label"), 'maxlength -> 20)
+                @helper.textarea(addMovementForm("details"))
+                @helper.inputText(addMovementForm("amount"), 'cleave -> "dkp")
+                @helper.inputText(addMovementForm("item"), 'cleave -> "item")
+                <div class="actions">
+                    <button type="submit">Ajouter</button>
+                </div>
+            }
+        </article>
+    }
+}
