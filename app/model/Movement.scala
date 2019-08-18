@@ -15,7 +15,7 @@ case class Movement(
     amount: DkpAmount,
     balance: DkpAmount,
     details: String,
-    author: Snowflake,
+    author: Option[Snowflake],
     item: Option[Int]
 ) {
   def humanDate: String = Movement.formatter.format(date)

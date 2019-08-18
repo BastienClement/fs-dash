@@ -64,7 +64,7 @@
                                         <th>Mouvement</th>
                                         <td class="id">@movement.id</td>
                                         <th>Auteur</th>
-                                        <td>@author.username</td>
+                                        <td>@author.map(a => a.username).getOrElse("–")</td>
                                         <th>Détails</th>
                                         <td rowspan="2" class="text">
                                         @if(movement.details.isBlank) {

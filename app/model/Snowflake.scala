@@ -19,16 +19,16 @@ object Snowflake {
 
   private lazy val random = new SecureRandom()
 
-  private def workerId  = random.nextInt(1 << 10)
+  private def workerId  = random.nextInt(0x800)
   private val increment = new AtomicInteger(0)
 
   val dummy = Snowflake(-1)
 
   def next: Snowflake =
     Snowflake(
-      ((System.currentTimeMillis() - epoch) << 22) |
-        ((workerId & 0X3FFL) << 12) |
-        (increment.getAndIncrement() & 0XFFFL)
+      (((System.currentTimeMillis() - epoch) & 0x1FFFFFFFFFFL) << 21) |
+        ((workerId & 0X7FFL) << 10) |
+        (increment.getAndIncrement() & 0X3FFL)
     )
 
   def fromString(string: String): Snowflake =

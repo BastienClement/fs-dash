@@ -14,7 +14,7 @@ class Movements(tag: Tag) extends Table[Movement](tag, "dkp_movements") {
   def amount      = column[DkpAmount]("amount")
   def balance     = column[DkpAmount]("balance")
   def details     = column[String]("details")
-  def author      = column[Snowflake]("author")
+  def author      = column[Option[Snowflake]]("author")
   def item        = column[Option[Int]]("item")
 
   override def * =

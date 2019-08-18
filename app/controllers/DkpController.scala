@@ -30,17 +30,18 @@ class DkpController extends DashController {
     val dateStart = pointDate.`with`(firstDayOfMonth).toInstant
     val dateEnd   = pointDate.`with`(firstDayOfNextMonth).toInstant
 
-    println(dateStart, dateEnd)
-
     def movementsForBalance = Movements.filter(m => m.account === id && m.date < dateEnd)
     def balance             = movementsForBalance.sortBy(m => m.id.desc).take(1).map(m => m.balance).sum.result
     def matchingMovements   = movementsForBalance.filter(m => m.date >= dateStart)
 
     def detailedMovementsData =
-      (for {
-        (m, t) <- matchingMovements.joinLeft(Transactions).on { case (m, t) => m.transaction === t.id }
-        u      <- Users if u.id === m.author
-      } yield (m, t, u)).sortBy { case (m, _, _) => m.id }
+      matchingMovements
+        .joinLeft(Transactions)
+        .on { case (m, t) => m.transaction === t.id }
+        .joinLeft(Users)
+        .on { case ((m, _), u) => m.author === u.id }
+        .map { case ((m, t), u) => (m, t, u) }
+        .sortBy { case (m, _, _) => m.id }
 
     for {
       optAccount <- Accounts.filter(a => a.id === id).result.headOption
@@ -85,7 +86,7 @@ class DkpController extends DashController {
                 data.amount,
                 DkpAmount.dummy,
                 data.details,
-                req.user.id,
+                Some(req.user.id),
                 data.item
               )
           )) andThen
@@ -191,6 +192,6 @@ object DkpController {
   case class DetailedMovement(
       movement: Movement,
       transaction: Option[Transaction],
-      author: User
+      author: Option[User]
   )
 }

@@ -1,0 +1,8 @@
+[Unit]
+Description=Run dash-dkp-decay.service every weeks
+
+[Timer]
+OnCalendar=Wed *-*-* 05:00:00 Europe/Paris
+
+[Install]
+WantedBy=timers.target

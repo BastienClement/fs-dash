@@ -20,7 +20,10 @@ case class DkpAmount(value: Int) extends AnyVal {
     math.abs(value / 100).toString
 
   private def fractional: String =
-    math.abs(value % 100).toString.padTo(2, '0')
+    math.abs(value % 100) match {
+      case n if n < 10 => s"0$n"
+      case n           => n.toString
+    }
 
   def signed: String =
     s"$sign$integer.$fractional"
