@@ -26,7 +26,7 @@ object Snowflake {
 
   def next: Snowflake =
     Snowflake(
-      (((System.currentTimeMillis() - epoch) & 0x1FFFFFFFFFFL) << 21) |
+      (((System.currentTimeMillis() - epoch) & 0x1FFFFFFFFFFL) << 22) |
         ((workerId & 0X7FFL) << 10) |
         (increment.getAndIncrement() & 0X3FFL)
     )

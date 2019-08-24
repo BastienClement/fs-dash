@@ -10,6 +10,7 @@
         @helper.form(action = routes.DkpController.createAccountPost()) {
             @CSRF.formField
             @helper.inputText(createAccountForm("label"), 'autofocus -> true)
+						@helper.select(createAccountForm("color"), Account.colors)
             @helper.checkbox(createAccountForm("enable-decay"))
             <div class="actions">
                 <button type="submit">Créer</button>

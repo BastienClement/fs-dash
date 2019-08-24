@@ -1,50 +1,44 @@
-@(accounts: Seq[Account], total: DkpAmount, transactions: Seq[Transaction])(implicit request: DashRequest[_])
+@(raiders: Seq[Account], casuals: Seq[Account], total: DkpAmount, transactions: Seq[Transaction])(implicit request: DashRequest[_])
 
 @layout.main("dkp") {
-    <article class="accounts">
-        <header>
-            <h3>Comptes</h3>
-            <div class="inline-toggle">
-                <span>Label</span>
-                <a href="">
-                    <i class="material-icons">toggle_off</i>
-                </a>
-                <span>Amount</span>
-            </div>
-        </header>
-        <main>
-            @for(account <- accounts) {
-                <div class="account">
-                    <a href="@routes.DkpController.account(account.id)">
-                        @if(account.useDecay) {
-                            <i class="material-icons">trending_down</i>
-                        }
-                    <aside>
-                        <span class="label">
-                        @account.label
-                        </span>
-                        <span class="id">@account.id</span>
-                    </aside>
-                    <div class="amount">
-                    @account.balance.html
-                    </div>
-                    </a>
-                </div>
-            }
-            @for(_ <- 1 to 5) {
-                <div class="dummy"></div>
-            }
-        </main>
-    </article>
+		<article class="accounts">
+			<header>
+				<h3>Comptes</h3>
+			</header>
+			@for((label, accounts) <- Seq("Raiders" -> raiders, "Casuals" -> casuals)) {
+				<main>
+					@for(account <- accounts) {
+						<div class="account">
+							<a href="@routes.DkpController.account(account.id)">
+								<aside>
+									<span class="label" @if(account.color.isDefined) {
+										style="color: #@account.color.get" }>
+									@account.label
+									</span>
+									<span class="id">@account.id</span>
+								</aside>
+								@if(account.useDecay) {
+									<i class="material-icons">trending_down</i>
+								}
+								<div class="amount">
+								@account.balance.html
+								</div>
+							</a>
+						</div>
+					}
+					@for(_ <- 1 to 5) {
+						<div class="dummy"></div>
+					}
+				</main>
+		}
+	</article>
 
     <div>
         <article>
             <header>
                 <h3>Total DKPs</h3>
             </header>
-            <main>
-                <p>@total.html</p>
-            </main>
+            <main><p>@total.html</p></main>
         </article>
 
         <article>

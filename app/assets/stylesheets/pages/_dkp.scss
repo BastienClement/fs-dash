@@ -7,7 +7,7 @@ body > main.dkp {
 
 			& > * {
 				flex: 1;
-				min-width: 350px;
+				min-width: 320px;
 			}
 		}
 	}
@@ -26,31 +26,26 @@ body > main.dkp {
 			margin-right: 16px;
 
 			span.id {
-				font-family: "SF Compact Text", sans-serif;
-				font-weight: 300;
-				font-size: 0.7em;
-				opacity: .5;
+				display: none;
 			}
 
 			span.label {
-				margin-bottom: 2px;
 				font-size: 1.2em;
 			}
 		}
 
 		i.material-icons {
 			opacity: .5;
-			font-size: 16px;
+			font-size: 14px;
 			vertical-align: middle;
-			border: 2px solid rgba(255, 255, 255, 0.5);
 			border-radius: 100%;
 			padding: 3px;
-			margin-right: 16px;
+			margin-right: 8px;
 		}
 
 		.amount {
 			white-space: nowrap;
-			font-size: 1.6em;
+			font-size: 1.2em;
 			font-family: "SF Pro Display", sans-serif;
 			padding: 0 8px;
 		}

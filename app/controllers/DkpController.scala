@@ -16,11 +16,12 @@ import play.api.mvc.{Action, AnyContent, Result}
 class DkpController extends DashController {
   def index: Action[AnyContent] = DashAction.async { implicit req =>
     for {
-      accounts     <- Accounts.sortBy(a => a.label).result
+      accounts     <- Accounts.sortBy(a => (a.useDecay.desc, a.label)).result
       total        <- Accounts.map(a => a.balance).sum.getOrElse(DkpAmount(0)).result
       transactions <- Transactions.sortBy(t => t.id.desc).take(10).result
     } yield {
-      Ok(views.html.dkp.index(accounts, total, transactions))
+      val (raiders, casuals) = accounts.partition(a => a.useDecay)
+      Ok(views.html.dkp.index(raiders, casuals, total, transactions))
     }
   }
 
@@ -126,7 +127,7 @@ class DkpController extends DashController {
         errors => DBIO.successful(BadRequest(views.html.dkp.createAccount(errors))),
         create => {
           val id = Snowflake.next
-          (Accounts += Account(id, create.label, DkpAmount(0), create.useDecay))
+          (Accounts += Account(id, create.label, Some(create.color), DkpAmount(0), create.useDecay))
             .map(_ => Redirect(routes.DkpController.account(id)))
         }
       )
@@ -151,11 +152,12 @@ class DkpController extends DashController {
 }
 
 object DkpController {
-  case class CreateAccount(label: String, useDecay: Boolean)
+  case class CreateAccount(label: String, color: String, useDecay: Boolean)
 
   val createAccountForm = Form(
     mapping(
       "label"        -> text(minLength = 3),
+      "color"        -> text(minLength = 6, maxLength = 6),
       "enable-decay" -> boolean
     )(CreateAccount.apply)(CreateAccount.unapply)
   )
