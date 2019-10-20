@@ -7,7 +7,7 @@ CREATE RULE auctions_orders_view_insert AS ON INSERT TO auctions_orders_view
 CREATE RULE auctions_orders_view_update AS ON UPDATE TO auctions_orders_view
     DO INSTEAD UPDATE auctions_orders SET closed = NEW.closed WHERE id = NEW.id;
 
-CREATE FUNCTION auctions_perform_matching() RETURNS VOID AS
+CREATE PROCEDURE auctions_perform_matching() AS
 $$
 DECLARE
     matching RECORD;;
@@ -28,7 +28,7 @@ $$ LANGUAGE plpgsql;
 
 -- !Downs
 
-DROP FUNCTION auctions_perform_matching();
+DROP PROCEDURE auctions_perform_matching();
 
 DROP RULE auctions_orders_view_update ON auctions_orders_view;
 DROP RULE auctions_orders_view_insert ON auctions_orders_view;

@@ -8,7 +8,7 @@
 	<article class="accounts">
 		<header>
 			<h3>Comptes</h3>
-			Nombre: <span class="capsule" style="margin-left: 4px; margin-right: 8px;">@accounts.size / @count</span>
+			Nombre: <span class="capsule" style="margin-left: 4px; margin-right: 8px;">@count</span>
 			Total: <span class="capsule" style="margin-left: 4px;">@total</span>
 			@if(request.user.isOfficer) {
 				<a href="@routes.DkpController.manage()">

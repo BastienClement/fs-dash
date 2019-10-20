@@ -31,7 +31,7 @@
 			@for((m, (an, ac), (bn, bc), i) <- matchings) {
 				<tr>
 					<td>@m.humanMatched</td>
-					<td><span class="wh-medium-border scaled"><img src="@i.mediumIconUrl"></span></td>
+					<td class="fit"><span class="wh-medium-border scaled"><img src="@i.mediumIconUrl"></span></td>
 					<td><span class="q@i.quality">@i.link</span> × @m.quantity</td>
 					<td></td>
 					<td class="right">@m.price.html</td>

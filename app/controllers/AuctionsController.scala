@@ -256,7 +256,7 @@ object AuctionsController {
         override protected def refine[A](request: DashRequest[A]): Future[Either[Result, AuctionRequest[A]]] = {
           (for {
             access  <- AccountAccesses if access.owner === request.user.id
-            account <- Accounts if account.id === access.account
+            account <- Accounts if account.id === access.account && !account.archived
           } yield (access, account))
             .sortBy { case (access, account) => (access.main.desc, account.label.asc) }
             .map { case (_, a) => a }

@@ -179,7 +179,7 @@ class DkpController extends DashController {
             }
           },
           data => {
-            (Movements ++= data.accounts.map(
+            (Movements ++= (data.accounts ++ account).map(
               account =>
                 dkp.Movement(
                   Snowflake.next,
@@ -213,7 +213,11 @@ class DkpController extends DashController {
                     .on { case (m, a) => m.account === a.id }
                     .sortBy { case (m, _) => m.id }
                     .result
-      accounts <- Accounts.map(a => a.id -> a.label).result.map(_.map { case (id, label) => id.toString -> label })
+      accounts <- Accounts
+                   .filter(a => !a.archived)
+                   .map(a => a.id -> a.label)
+                   .result
+                   .map(_.map { case (id, label) => id.toString -> label })
     } yield {
       optTransaction.fold(NotFound(views.html.error("Erreur", Some("Cette transaction n'existe pas.")))) {
         transaction =>
