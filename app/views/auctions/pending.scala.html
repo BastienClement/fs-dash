@@ -1,0 +1,64 @@
+@(matchings: Seq[AuctionsController.DetailedMatch])(implicit request: DashRequest[_])
+
+@layout.main("auctions") {
+	<article class="pending-matches" style="flex: 1; max-width: 1200px">
+		<header>
+			<h3>Échanges en attente</h3>
+		</header>
+		<table class="tabular">
+			<thead>
+				<tr>
+					<th colspan="4" class="border-right"></th>
+					<th colspan="2" class="center border-left border-right">Prix</th>
+					<th class="border-left border-right"></th>
+					<th colspan="3" class="center border-left border-right">Joueurs</th>
+					<th colspan="2" class="border-left"></th>
+				</tr>
+				<tr>
+					<th class="fit">Date</th>
+					<th class="border-right" colspan="3">Item</th>
+					<th class="fit right border-left">Unit.</th>
+					<th class="fit right border-right">Total</th>
+					<th class="border-left border-right"></th>
+					<th class="fit border-left">Vendeur</th>
+					<th class="fit"></th>
+					<th class="fit border-right">Acheteur</th>
+					<th class="border-left"></th>
+					<th class="fit"></th>
+				</tr>
+			</thead>
+			<tbody>
+			@for((m, (an, ac), (bn, bc), i) <- matchings) {
+				<tr>
+					<td>@m.humanMatched</td>
+					<td><span class="wh-medium-border scaled"><img src="@i.mediumIconUrl"></span></td>
+					<td><span class="q@i.quality">@i.link</span> × @m.quantity</td>
+					<td></td>
+					<td class="right">@m.price.html</td>
+					<td class="right">@{(m.price * m.quantity).html}</td>
+					<td></td>
+					<td><span style="color: #@ac">@an</span></td>
+					<td><i class="material-icons">chevron_right</i></td>
+					<td><span style="color: #@bc">@bn</span></td>
+					<td></td>
+					<td>
+						<form method="post" action="@routes.AuctionsController.ackMatching(m.id, true)">
+							@helper.CSRF.formField
+							<button><i class="material-icons">check</i></button>
+						</form>
+						<form method="post" action="@routes.AuctionsController.ackMatching(m.id, false)">
+							@helper.CSRF.formField
+							<button><i class="material-icons">close</i></button>
+						</form>
+					</td>
+				</tr>
+			}
+			@if(matchings.isEmpty) {
+				<tr class="no-hover">
+					<td colspan="12" style="padding: 24px">Aucun échange en attente.</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	</article>
+}

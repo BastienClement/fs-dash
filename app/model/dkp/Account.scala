@@ -1,16 +1,24 @@
-package model
+package model.dkp
+
+import model.Snowflake
 
 case class Account(
     id: Snowflake,
     label: String,
     color: Option[String],
     balance: DkpAmount,
-    useDecay: Boolean
-)
+    archived: Boolean,
+    useDecay: Boolean,
+    overdraft: DkpAmount,
+    holds: DkpAmount = DkpAmount(0)
+) {
+  def available: DkpAmount     = balance - holds
+  def withdrawLimit: DkpAmount = available + overdraft
+}
 
 object Account {
   def colors: Seq[(String, String)] = Seq(
-    "64B4FF" -> "From Scratch",
+    "F5C635" -> "From Scratch",
     "FF7D0A" -> "Druid",
     "ABD473" -> "Hunter",
     "40C7EB" -> "Mage",

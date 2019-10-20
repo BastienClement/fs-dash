@@ -1,4 +1,5 @@
-@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, previous: Long, next: Long,month:String)(implicit request: DashRequest[_])
+@import model.dkp.{Account, DkpAmount, Hold}
+@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, holds: Seq[Hold], previous: Long, next: Long, month:String, addMovementForm: Form[DkpController.AddMovement])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
 
 @layout.main("dkp-account") {
     <article class="account-details">
@@ -10,7 +11,7 @@
             </div>
         </header>
         <div class="table-container">
-            <table>
+            <table class="tabular">
                 <thead>
                     <tr>
                         <th class="fit"></th>
@@ -92,13 +93,26 @@
                         </tr>
                     }
                     @if(movements.isEmpty) {
-                        <tr>
+                        <tr class="unclickable">
                             <td colspan="8">
                                 Aucun mouvement sur la période.
                             </td>
                         </tr>
+												<tr></tr>
                     }
-                </tbody>
+										@for(hold <- holds) {
+											<tr class="hold unclickable">
+												<td><i class="material-icons show">update</i></td>
+												<td>En attente</td>
+												<td></td>
+												<td>@hold.label</td>
+												<td></td>
+												<td class="right">@hold.amount</td>
+												<td colspan="2"></td>
+											</tr>
+											<tr></tr>
+										}
+								</tbody>
                 <tfoot>
                     <tr>
                         <th colspan="5" class="right">Total des mouvements</th>
@@ -110,8 +124,36 @@
                         <th colspan="5" class="right">Solde final</th>
                         <td colspan="3" class="right">@balance</td>
                     </tr>
+										@if(holds.nonEmpty) {
+											<tr>
+													<th colspan="5" class="right">En attente</th>
+													<td class="right">@holds.map(_.amount).sum</td>
+													<td colspan="2"></td>
+											</tr>
+											<tr>
+													<th colspan="5" class="right">Solde disponible</th>
+													<td colspan="3" class="right">@{balance - holds.map(_.amount).sum}</td>
+											</tr>
+                    }
                 </tfoot>
             </table>
         </div>
     </article>
+		@if(request.user.isOfficer) {
+			<article class="add-movement">
+				<header>
+					<h3>Ajouter un mouvement</h3>
+				</header>
+				@helper.form(action = routes.DkpController.createMovement(None, Some(account.id))) {
+					@helper.CSRF.formField
+					@helper.inputText(addMovementForm("label"), Symbol("maxlength") -> 30)
+					@helper.textarea(addMovementForm("details"))
+					@helper.inputText(addMovementForm("amount"), Symbol("cleave") -> "dkp")
+					@helper.inputText(addMovementForm("item"), Symbol("cleave") -> "item")
+					<div class="actions">
+						<button type="submit">Ajouter</button>
+					</div>
+				}
+			</article>
+		}
 }

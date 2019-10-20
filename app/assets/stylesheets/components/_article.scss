@@ -9,6 +9,11 @@ main article {
 
 	margin: 16px;
 
+	article {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
 	@media screen and (max-width: $mobile-breakpoint) {
 		margin: 8px 0;
 	}
@@ -29,6 +34,7 @@ main article {
 		border-bottom: 1px solid $border-color-alt;
 
 		display: flex;
+		align-items: center;
 
 		h2, h3 {
 			font-weight: 400;
@@ -64,6 +70,14 @@ main article {
 		width: 100%;
 		border-collapse: separate;
 		border-spacing: 0;
+
+		td.border-left, th.border-left {
+			border-left: 1px solid $border-color;
+		}
+
+		td.border-right, th.border-right {
+			border-right: 1px solid $border-color-alt;
+		}
 
 		& > thead > tr {
 			& > th {
@@ -115,7 +129,7 @@ main article {
 				background-color: #ffffff03;
 			}
 
-			&:hover {
+			&:not(.no-hover):hover {
 				& > th, & > td {
 					background-color: #ffffff07;
 				}
@@ -124,7 +138,10 @@ main article {
 
 		& > tbody.with-details {
 			& > tr {
-				cursor: pointer;
+				&:not(.unclickable) {
+					cursor: pointer;
+				}
+
 				background: none;
 
 				&:nth-child(4n - 1), &:nth-child(4n) {

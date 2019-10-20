@@ -1,81 +1,101 @@
-@(raiders: Seq[Account], casuals: Seq[Account], total: DkpAmount, transactions: Seq[Transaction])(implicit request: DashRequest[_])
+@import model.dkp.Transaction
+@import model.dkp.Account
+@import model.dkp.AccountAccess
+@import model.dkp.DkpAmount
+@(accounts: Seq[Seq[Account]], count: Int, total: DkpAmount, mines: Seq[(Account, AccountAccess)], transactions: Seq[Transaction])(implicit request: DashRequest[_])
 
 @layout.main("dkp") {
-		<article class="accounts">
-			<header>
-				<h3>Comptes</h3>
-			</header>
-			@for((label, accounts) <- Seq("Raiders" -> raiders, "Casuals" -> casuals)) {
-				<main>
-					@for(account <- accounts) {
-						<div class="account">
-							<a href="@routes.DkpController.account(account.id)">
-								<aside>
-									<span class="label" @if(account.color.isDefined) {
-										style="color: #@account.color.get" }>
-									@account.label
-									</span>
-									<span class="id">@account.id</span>
-								</aside>
-								@if(account.useDecay) {
-									<i class="material-icons">trending_down</i>
-								}
-								<div class="amount">
-								@account.balance.html
-								</div>
-							</a>
-						</div>
-					}
-					@for(_ <- 1 to 5) {
-						<div class="dummy"></div>
-					}
-				</main>
-		}
+	<article class="accounts">
+		<header>
+			<h3>Comptes</h3>
+			Nombre: <span class="capsule" style="margin-left: 4px; margin-right: 8px;">@accounts.size / @count</span>
+			Total: <span class="capsule" style="margin-left: 4px;">@total</span>
+			@if(request.user.isOfficer) {
+				<a href="@routes.DkpController.manage()">
+				<i class="material-icons" style="margin-left: 8px;">settings_applications</i></a>
+			}
+		</header>
+		<main>
+			@for(group <- accounts) {
+				<div class="accounts-group">
+				@for(account <- group) {
+					<div class="account">
+						<a href="@routes.DkpController.account(account.id)">
+							<span class="label" @if(account.color.isDefined) {
+								style="color: #@account.color.get" }>
+							@account.label
+							</span>
+							<div class="amount">
+							@account.available.html
+							</div>
+						</a>
+					</div>
+				}
+				</div>
+			}
+		</main>
 	</article>
 
-    <div>
-        <article>
-            <header>
-                <h3>Total DKPs</h3>
-            </header>
-            <main><p>@total.html</p></main>
-        </article>
+	<div style="min-width: 300px;">
+		<article>
+			<header>
+				<h3>Mes comptes</h3>
+			</header>
+			<main>
+				@for((account, access) <- mines) {
+					<div class="account">
+						<a href="@routes.DkpController.account(account.id)">
+							<span class="label" @if(account.color.isDefined) {
+								style="color: #@account.color.get" }>
+							@account.label
+							</span>
+							@if(access.main) {
+								<i class="material-icons">star</i>
+							}
+							<div class="amount">
+							@account.available.html
+							</div>
+						</a>
+					</div>
+				}
+			</main>
+		</article>
 
-        <article>
-            <header>
-                <h3>Dernières transactions</h3>
-            </header>
-            <table>
-                <tbody>
-                @for(t <- transactions) {
-                    <tr>
-                        <td>
-                            <a href="@routes.DkpController.transaction(t.id)">
-                                @t.label
-                            </a>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </article>
+		<article>
+			<header>
+				<h3>Dernières transactions</h3>
+			</header>
+			<table>
+				<tbody>
+				@for(t <- transactions) {
+					<tr>
+						<td>
+							<a href="@routes.DkpController.transaction(t.id)">
+							@t.label
+							</a>
+						</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		</article>
 
-        @if(request.authenticated && request.user.isOfficer) {
-            <article class="operations">
-                <header>
-                    <h3>Opérations</h3>
-                </header>
-                <nav>
-                    <a href="@routes.DkpController.createTransaction()">
-                        <i class="material-icons">compare_arrows</i>
-                        Nouvelle transaction
-                    </a>
-                    <a href="@routes.DkpController.createAccount()">
-                        <i class="material-icons">account_balance_wallet</i>
-                        Créer un compte
-                    </a>
-                </nav>
-            </article>
-        }
-    </div>
+		@if(request.authenticated && request.user.isOfficer) {
+			<article class="operations">
+				<header>
+					<h3>Opérations</h3>
+				</header>
+				<nav>
+					<a href="@routes.DkpController.createTransaction()">
+						<i class="material-icons">compare_arrows</i>
+						Nouvelle transaction
+					</a>
+					<a href="@routes.DkpController.createAccount()">
+						<i class="material-icons">account_balance_wallet</i>
+						Créer un compte
+					</a>
+				</nav>
+			</article>
+		}
+	</div>
 }

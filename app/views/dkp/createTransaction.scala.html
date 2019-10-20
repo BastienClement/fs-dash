@@ -9,7 +9,7 @@
         </header>
         @helper.form(action = routes.DkpController.createTransactionPost()) {
             @CSRF.formField
-            @helper.inputText(createTransactionForm("label"), 'autofocus -> true, 'maxlength -> 20)
+            @helper.inputText(createTransactionForm("label"), 'autofocus -> true, 'maxlength -> 30)
             @helper.textarea(createTransactionForm("details"))
             <div class="actions">
                 <button type="submit">Créer</button>

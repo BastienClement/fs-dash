@@ -37,7 +37,7 @@ body > main {
 			font-weight: 300;
 		}
 
-		input[type=text]:not([id$=-selectized]), input[type=password], textarea {
+		input[type=text]:not([id$=-selectized]), input[type=password], textarea, select {
 			background: transparent;
 			border: 0;
 			border-bottom: 2px solid #ffffff20;
@@ -52,12 +52,16 @@ body > main {
 			width: 100%;
 		}
 
+		option {
+			background-color: #111;
+		}
+
 		textarea {
 			resize: none;
 			min-width: 300px;
 		}
 
-		input[type=checkbox] {
+		input[type=checkbox], input[type=radio] {
 			appearance: none;
 			-webkit-appearance: none;
 
@@ -67,6 +71,8 @@ body > main {
 			height: 20px;
 
 			margin-top: 8px;
+			vertical-align: -5px;
+			margin-right: 4px;
 
 			outline: none;
 
@@ -151,6 +157,24 @@ body > main {
 			}
 		}
 
+		dd.radio {
+			display: flex;
+			margin-top: 8px;
+
+			& > * {
+				flex: 1;
+			}
+
+			label {
+				display: flex;
+				align-items: center;
+
+				input {
+					margin: 0 5px 0 0;
+				}
+			}
+		}
+
 		.actions {
 			display: flex;
 			margin: 8px;
@@ -158,6 +182,47 @@ body > main {
 			& > button {
 				flex: 1;
 				margin: 8px;
+			}
+		}
+
+		.button-toggles {
+			display: flex;
+			margin: 8px;
+
+			& > label {
+				flex: 1;
+				display: flex;
+				margin: 8px;
+
+				input[type=radio] {
+					display: none;
+
+					& + * {
+						flex: 1;
+
+						padding: 8px 16px;
+						text-transform: uppercase;
+						font-family: "SF Pro Display", sans-serif;
+						font-size: 14px;
+						font-weight: 500;
+						background: none;
+						border: 0;
+						color: #eee;
+						text-align: center;
+
+						&:not(:disabled) {
+							cursor: pointer;
+
+							&:hover, &:focus {
+								background: #ffffff10;
+							}
+						}
+					}
+
+					&:checked + * {
+						background: #ffffff10;
+					}
+				}
 			}
 		}
 	}

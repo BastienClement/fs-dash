@@ -4,6 +4,8 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 import controllers.routes
+import db.Users
+import db.api._
 import javax.inject.{Inject, Singleton}
 import model.{Session, Snowflake, User}
 import play.api.Configuration
@@ -62,37 +64,68 @@ class DiscordService @Inject()(conf: Configuration, ws: WSClient)(implicit ec: E
 
   def refreshToken()(implicit session: Session, request: Request[_]): Future[Either[JsValue, Session]] = {
     val data = Map(
-      "client_id" -> clientId,
+      "client_id"     -> clientId,
       "client_secret" -> clientSecret,
-      "grant_type" -> "refresh_token",
+      "grant_type"    -> "refresh_token",
       "refresh_token" -> session.refreshToken,
-      "redirect_uri" -> redirectUrl,
-      "scope" -> tokenScope
+      "redirect_uri"  -> redirectUrl,
+      "scope"         -> tokenScope
     )
 
     ws.url(s"${discordApi}/oauth2/token").post(data).map(mapResult[Session]).map {
-      case Left(res) => Left(res)
+      case Left(res)         => Left(res)
       case Right(newSession) => Right(newSession.copy(id = session.id, owner = session.owner))
     }
   }
 
-  def fetchUser()(implicit session: Session): Future[Either[JsValue, User]] =
-    api("/users/@me").get().map(mapResult[User]).flatMap {
-      case Left(res) =>
-        Future.successful(Left(res))
-      case Right(user) =>
-        botApi(s"/guilds/${DiscordService.FsClassicGuild}/members/${user.id}")
+  def fetchUsers(): DBIOAction[Either[JsValue, Unit], NoStream, Effect with W with T] =
+    DBIO
+      .from(
+        botApi(s"/guilds/${DiscordService.FsClassicGuild}/members")
+          .withQueryStringParameters("limit" -> "1000")
           .get()
-          .map {
-            case res if res.status == 200 =>
-              (res.json \ "roles").as[JsArray].value.map(role => Snowflake.fromString(role.as[String])).toSet
-            case _ =>
-              Set.empty[Snowflake]
+          .map(mapResult[JsArray])
+      )
+      .flatMap {
+        case Left(err) =>
+          DBIO.successful(Left(err))
+        case Right(members) =>
+          val users = members.value.map { member =>
+            User(
+              id = (member \ "user" \ "id").as[Snowflake],
+              username = (member \ "nick").asOpt[String].getOrElse((member \ "user" \ "username").as[String]),
+              discriminator = (member \ "user" \ "discriminator").as[String],
+              avatar = (member \ "user" \ "avatar").asOpt[String],
+              roles = (member \ "roles").as[JsArray].value.map(role => Snowflake.fromString(role.as[String])).toSet
+            )
           }
-          .map { roles =>
-            Right(user.copy(roles = roles))
-          }
-    }
+
+          Users
+            .insertOrUpdateAll(users)
+            .andThen(Users.filter(u => !(u.id inSet users.map(_.id))).map(_.roles).update(Set.empty))
+            .map(_ => Right(()))
+            .transactionally
+      }
+
+  def fetchUser()(implicit session: Session, database: Database): Future[Either[JsValue, User]] =
+    DBIO
+      .from(api("/users/@me").get().map(mapResult[User]))
+      .flatMap {
+        case Left(res) =>
+          DBIO.successful(Left(res))
+        case Right(user) =>
+          fetchUsers()
+            .flatMap {
+              case Left(res) => DBIO.successful(Left(res))
+              case Right(_)  => Users.findById(user.id).result.headOption.map(Right.apply)
+            }
+            .map {
+              case Left(res)           => Left(res)
+              case Right(Some(member)) => Right(member)
+              case Right(None)         => Right(user)
+            }
+      }
+      .run
 }
 
 object DiscordService {

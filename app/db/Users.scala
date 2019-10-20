@@ -11,7 +11,7 @@ class Users(tag: Tag) extends Table[User](tag, "users") {
 
   def roles =
     column[String]("roles") <> (
-      (t: String) => t.split(",").map(Snowflake.fromString).toSet,
+      (t: String) => t.split(",").filter(_.nonEmpty).map(Snowflake.fromString).toSet,
       (s: Set[Snowflake]) => Some(s.map(_.toString).mkString(","))
     )
 

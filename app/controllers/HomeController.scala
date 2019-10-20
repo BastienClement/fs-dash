@@ -6,7 +6,7 @@ import model.Snowflake
 @Singleton
 class HomeController extends DashController {
   def index = DashAction { implicit req =>
-    Redirect(routes.DkpController.index())
+    Redirect(routes.CharterController.index())
   }
 
   def snowflake = Action { req =>

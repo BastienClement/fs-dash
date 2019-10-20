@@ -10,9 +10,9 @@ class DashRequest[A](
 )(implicit val services: Services)
     extends WrappedRequest(request) {
 
-  def authenticated: Boolean = optUser.isDefined
+  def user: User = optUser.getOrElse(User.Anonymous)
 
-  def user: User = optUser.get
+  def authenticated: Boolean = user.isFromScratch
 
   def authLink(implicit request: DashRequest[_]): String = services.discordService.loginLink
 }

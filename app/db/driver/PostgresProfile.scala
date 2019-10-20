@@ -1,10 +1,12 @@
 package db.driver
 
+import java.sql.{PreparedStatement, ResultSet}
+
 import akka.Done
 import com.github.tminglei.slickpg._
 import db.driver.PostgresProfile.{AscribedType, ImplicitOps, ShortEffects}
 import play.api.mvc.Result
-import slick.ast.{BaseTypedType, OptionType, ScalaType, Type}
+import slick.ast._
 import slick.basic.Capability
 import slick.dbio.{DBIO, DBIOAction, Effect, NoStream}
 import slick.jdbc.{JdbcCapabilities, JdbcType}
@@ -43,8 +45,24 @@ trait PostgresProfile
       }
 
   override def jdbcTypeFor(t: Type): JdbcType[Any] = t match {
-    case at: AscribedType[_] => jdbcTypeFor(at.wrapped)
-    case other               => super.jdbcTypeFor(other)
+    case at: AscribedType[_] =>
+      val wrapped = super.jdbcTypeFor(at.wrapped)
+      new JdbcType[Any] {
+        override def sqlType: Int = java.sql.Types.OTHER
+
+        override def sqlTypeName(size: Option[FieldSymbol]): String         = at.ascription.toUpperCase
+        override def setValue(v: Any, p: PreparedStatement, idx: Int): Unit = p.setObject(idx, v, sqlType)
+        override def setNull(p: PreparedStatement, idx: Int): Unit          = wrapped.setNull(p, idx)
+        override def getValue(r: ResultSet, idx: Int): Any                  = wrapped.getValue(r, idx)
+        override def wasNull(r: ResultSet, idx: Int): Boolean               = wrapped.wasNull(r, idx)
+        override def updateValue(v: Any, r: ResultSet, idx: Int): Unit      = wrapped.updateValue(v, r, idx)
+        override def valueToSQLLiteral(value: Any): String                  = wrapped.valueToSQLLiteral(value)
+        override def hasLiteralForm: Boolean                                = wrapped.hasLiteralForm
+        override def scalaType                                              = wrapped.scalaType
+        override def classTag: ClassTag[_]                                  = wrapped.classTag
+      }
+    case other =>
+      super.jdbcTypeFor(other)
   }
 
   override val api =

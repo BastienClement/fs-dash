@@ -1,0 +1,58 @@
+@(account: model.dkp.Account, links: Seq[(model.dkp.AccountAccess, model.User)], users: Seq[model.User])(implicit request: DashRequest[_])
+
+@layout.main("dkp-manage") {
+	<article style="width: 500px">
+		<header>
+			<h3>
+				Gestion des accès:
+				<span style="margin-left: 8px; color: #@account.color">@account.label</span>
+			</h3>
+			<a href="@routes.DkpController.manage()"><i class="material-icons">arrow_back</i></a>
+		</header>
+		<form method="post" action="@routes.DkpController.manageLinksPost(account.id)">
+			@helper.CSRF.formField
+			<table>
+				<thead>
+					<tr>
+						<th colspan="3">Accès existants</th>
+					</tr>
+					<tr>
+						<th class="fit center">Accès</th>
+						<th class="fit center">Main</th>
+						<th>Joueur</th>
+					</tr>
+				</thead>
+				<tbody>
+				@for((access, user) <- links) {
+					<tr>
+						<td class="center">
+							<input type="checkbox" name="access" value="@user.id" style="margin-top: 0" checked="checked" />
+						</td>
+						<td class="center">
+							<input type="checkbox" name="main" value="@user.id" style="margin-top: 0" @if(access.main) { checked="checked" }/>
+						</td>
+						<td><span style="color: #@user.color">@user.username</span></td>
+					</tr>
+				}
+				</tbody>
+			</table>
+			<main>
+				<dl>
+					<dt>Ajouter des accès</dt>
+					<dd>
+						<select multiple name="add">
+						@for(user <- users) {
+							<option value="@user.id">@user.username#@user.discriminator</option>
+						}
+						</select>
+					</dd>
+				</dl>
+			</main>
+			<main>
+				<div class="actions" style="margin: 0">
+					<button type="submit">Sauvegarder</button>
+				</div>
+			</main>
+		</form>
+	</article>
+}

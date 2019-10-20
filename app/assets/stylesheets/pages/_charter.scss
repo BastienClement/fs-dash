@@ -1,0 +1,128 @@
+body > main.charter {
+	$numbering-width: 45px;
+
+	.toc {
+		position: sticky;
+		top: 76px;
+		min-width: 200px;
+
+		main {
+			padding: 0;
+		}
+
+		ol {
+			list-style: none;
+			counter-reset: section;
+
+			li {
+				counter-increment: section;
+
+				border-top: 1px solid #ffffff18;
+				border-bottom: 1px solid #00000050;
+
+				&:first-child {
+					border-top: 0;
+				}
+
+				&:last-child {
+					border-bottom: 0;
+				}
+
+				a {
+					display: block;
+					padding: 4px 8px;
+
+					&::before {
+						content: counter(section);
+						width: 20px;
+						margin-right: 8px;
+						text-align: center;
+						display: inline-block;
+						color: $color-fs;
+					}
+				}
+			}
+		}
+	}
+
+	.content {
+		counter-reset: section;
+		max-width: 800px;
+
+		article {
+			&:first-of-type .actions .up {
+				display: none;
+			}
+
+			&:last-of-type .actions .down {
+				display: none;
+			}
+
+			a:not([href]) {
+				position: relative;
+				top: -77px;
+			}
+		}
+
+		article h3 {
+			counter-increment: section;
+			counter-reset: paragraph;
+			font-family: "SF Pro Text", sans-serif;
+			font-weight: 400;
+			font-size: 16px;
+
+			&::before {
+				font-family: "SF Compact Display", sans-serif;
+				content: "§ " counter(section);
+				width: $numbering-width;
+				margin: 0 0 0 8px;
+				font-weight: 300;
+				color: $color-fs;
+			}
+		}
+
+		header a i {
+			font-size: 16px;
+			margin-left: 4px;
+			transform: translateY(1px);
+
+			&:hover {
+				color: $color-fs;
+			}
+		}
+
+		article main > * {
+			padding-left: $numbering-width;
+			margin: 8px;
+		}
+
+		article main {
+			a {
+				color: $color-fs;
+			}
+
+			p {
+				counter-increment: paragraph;
+				position: relative;
+
+				&::before {
+					position: absolute;
+					top: 0;
+					left: 0;
+
+					font-family: "SF Compact Text", sans-serif;
+					content: "" counter(section) "." counter(paragraph);
+					font-weight: 400;
+					color: #888;
+					font-variant-numeric: tabular-nums;
+				}
+			}
+
+			ul, ol {
+				li {
+					margin: 4px 0 4px 24px;
+				}
+			}
+		}
+	}
+}

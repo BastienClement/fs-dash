@@ -1,0 +1,11 @@
+[Unit]
+Description=Runs DKP auction match procedure
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker run --rm \
+    --env-file /opt/fs-dash/env \
+    postgres:alpine \
+    psql -c CALL\x20auctions_perform_matching()

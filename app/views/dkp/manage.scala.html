@@ -1,0 +1,79 @@
+@(accounts: Seq[(model.dkp.Account, Seq[(model.dkp.AccountAccess, model.User)])])(implicit request: DashRequest[_])
+
+@checkedAttribute(test: Boolean) = {
+@if(test) { checked }
+}
+
+@layout.main("dkp-manage") {
+	<article style="flex: 1;
+		max-width: 1200px;">
+		<header>
+			<h3>Comptes DKP</h3>
+			<a href="@routes.DkpController.createAccount()"><i class="material-icons">add</i></a>
+		</header>
+		<table>
+			<thead>
+				<tr>
+					<th class="fit">Compte</th>
+					<th></th>
+					<th class="fit right">Balance</th>
+					<th class="fit right">Réserves</th>
+					<th></th>
+					<th class="fit right">Overdraft</th>
+					<th></th>
+					<th class="fit center">Archivé</th>
+					<th class="fit center">Decay</th>
+					<th></th>
+					<th>Accès</th>
+					<th class="fit right">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+			@for((account, accesses) <- accounts) {
+				<tr>
+					<td><a href="@routes.DkpController.account(account.id)" style="color: #@account.color">@account.label</a></td>
+					<td></td>
+					<td class="right">@account.balance.html</td>
+					<td class="right">@account.holds.html</td>
+					<td></td>
+					<td class="right">@account.overdraft.html</td>
+					<td></td>
+					<td class="center">
+						<form action="@routes.DkpController.manageArchived(account.id)" method="get">
+							<input data-action="toggle-archived" name="state" value="true" type="checkbox" style="margin-top: 0"
+								@checkedAttribute(account.archived) onchange="this.form.submit()" />
+						</form>
+					</td>
+					<td class="center">
+						<form action="@routes.DkpController.manageUseDecay(account.id)" method="get">
+							<input data-action="toggle-usedecay" name="state" value="true" type="checkbox" style="margin-top: 0"
+								@checkedAttribute(account.useDecay) onchange="this.form.submit()" />
+						</form>
+					</td>
+					<td></td>
+					<td>
+						<div style="display: inline-flex; align-items: center">
+						@for((access, user) <- accesses) {
+							<span class="capsule" style="margin-right: 4px; background-color: transparent; border: 1px solid #444; color: #@user.color">
+								@if(access.main) {
+									<i class="material-icons">star</i>
+								}
+								@user.username
+							</span>
+						}
+						</div>
+					</td>
+					<td class="right">
+						<!--<a href="@routes.DkpController.manageEdit(account.id)">
+							<i class="material-icons" style="font-size: 16px; padding: 0 4px;">edit</i>
+						</a>-->
+						<a href="@routes.DkpController.manageLinks(account.id)">
+							<i class="material-icons" style="font-size: 18px; padding: 0 4px;">link</i>
+						</a>
+					</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+	</article>
+}

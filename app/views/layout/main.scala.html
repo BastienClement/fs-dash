@@ -1,8 +1,8 @@
 @(clazz: String = null)(body: Html)(implicit request: DashRequest[_])
 
-@menuItem(path: String, icon: String, label: String = null, secure: Boolean = true) = {
+@menuItem(path: play.api.mvc.Call, icon: String, label: String = null, secure: Boolean = true) = {
 @if(!secure || request.authenticated) {
-    <li @if(request.path.startsWith(path)) {
+    <li @if(request.path.startsWith(path.url)) {
         class="active" }>
         <a href="@path"><i class="material-icons">@icon</i>@if(label != null) {
             <span>@label</span>
@@ -25,18 +25,23 @@
 <script src="@routes.Assets.versioned("javascripts/autosize.min.js")" defer></script>
 <script src="@routes.Assets.versioned("javascripts/selectize.min.js")" defer></script>
 <script src="@routes.Assets.versioned("javascripts/cleave.min.js")" defer></script>
-<script src="@routes.Assets.versioned("javascripts/chart.bundle.min.js")"></script>
 <script src="@routes.Assets.versioned("javascripts/dash.js")" defer></script>
 
 <header>
     <h1>Dash</h1>
     <nav>
         <ul>
-            @menuItem("/dkp", "account_balance", "DKP", secure = false)
-            @*
-            @menuItem("/roster", "supervisor_account", "Roster")
-            @menuItem("/dashboard", "apps")
-            @menuItem("/attendance", "event", "Attendance")
+					@menuItem(routes.CharterController.index, "gavel", "Charte", secure = false)
+					@*
+					@menuItem(routes.BountiesController.index, "priority_high", "Bounties")
+					@menuItem(routes.DkpController.index, "assignment_ind", "Kill on Sight")
+					*@
+					@menuItem(routes.AuctionsController.index, "swap_horizontal_circle", "Trades")
+					@menuItem(routes.DkpController.index, "account_balance", "DKP")
+					@*
+					@menuItem("/calendar", "event", "Calendar")
+						@menuItem("/roster", "supervisor_account", "Roster")
+						@menuItem("/dashboard", "apps")
             @menuItem("/import", "cloud_upload")
             *@
         </ul>
@@ -48,7 +53,7 @@
                     request.user.avatar.get
                 }.png?size=128">
             }
-            <span>@request.user.username</span>
+            <span style="color: #@request.user.color">@request.user.username</span>
             <a href="@routes.LoginController.logout()"><i class="material-icons">close</i></a>
         </div>
     } else {

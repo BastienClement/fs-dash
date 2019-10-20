@@ -1,0 +1,19 @@
+@(id: Option[Snowflake], sectionForm: Form[CharterController.SectionForm])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
+
+@import helper._
+
+@layout.main() {
+    <article style="width: 700px;">
+        <header>
+            <h3>Édition d'une section</h3>
+        </header>
+        @helper.form(action = routes.CharterController.editPost(id)) {
+            @CSRF.formField
+            @helper.inputText(sectionForm("title"), 'autofocus -> true)
+            @helper.textarea(sectionForm("body"))
+            <div class="actions">
+                <button type="submit">Save</button>
+            </div>
+        }
+    </article>
+}

@@ -1,0 +1,8 @@
+[Unit]
+Description=Run dash-auctions-match.service every minutes
+
+[Timer]
+OnCalendar=minutely
+
+[Install]
+WantedBy=timers.target

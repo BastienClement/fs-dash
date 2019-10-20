@@ -41,7 +41,7 @@ class DashController extends BaseController with play.api.i18n.I18nSupport {
                     case Success(user) => DBIO.successful(Some(user))
                     case Failure(_)    => Sessions.filter(s => s.id === session.id).delete andThen DBIO.successful(None)
                   }
-                case Some(session) if session.lastChecked isBefore Instant.now.minusSeconds(60 * 60) =>
+                case Some(session) if session.lastChecked isBefore Instant.now.minusSeconds(5 * 60) =>
                   (refreshUser(session) andThen DBIO.successful(session.owner)).asTry.flatMap {
                     case Success(user) => DBIO.successful(Some(user))
                     case Failure(_)    => Sessions.filter(s => s.id === session.id).delete andThen DBIO.successful(None)
@@ -92,7 +92,7 @@ class DashController extends BaseController with play.api.i18n.I18nSupport {
   private def AuthenticatedFilter(check: User => Boolean): ActionFilter[DashRequest] = new ActionFilter[DashRequest] {
     override protected def filter[A](request: DashRequest[A]): Future[Option[Result]] =
       Future.successful {
-        if (request.optUser.exists(check)) None
+        if (request.authenticated && check(request.user)) None
         else Some(Redirect(routes.HomeController.index()))
       }
 
@@ -105,6 +105,9 @@ class DashController extends BaseController with play.api.i18n.I18nSupport {
 
     def authenticated: ActionBuilder[DashRequest, AnyContent] =
       this andThen AuthenticatedFilter(_ => true)
+
+    def officers: ActionBuilder[DashRequest, AnyContent] =
+      this andThen AuthenticatedFilter(u => u.isOfficer)
 
     def check(check: User => Boolean): ActionBuilder[DashRequest, AnyContent] =
       this andThen AuthenticatedFilter(check)

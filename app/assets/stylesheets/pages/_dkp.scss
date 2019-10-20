@@ -1,37 +1,41 @@
 body > main.dkp {
 	.accounts {
+		flex: 1;
+
 		main {
 			display: flex;
 			flex-wrap: wrap;
 			flex-direction: row;
+			justify-content: space-around;
+			padding-bottom: 0;
 
 			& > * {
-				flex: 1;
-				min-width: 320px;
+				width: 12.5%;
+				min-width: 180px;
 			}
 		}
+	}
+
+	.accounts-group {
+		margin-bottom: 8px;
 	}
 
 	.account a {
 		display: flex;
 		align-items: center;
-		padding: 8px;
+		padding: 6px;
 		border: 1px solid #ffffff10;
 		margin: 4px;
 
-		aside {
-			display: flex;
-			flex-direction: column;
+		span.label {
+			margin-right: 8px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 			flex: 1;
-			margin-right: 16px;
-
-			span.id {
-				display: none;
-			}
-
-			span.label {
-				font-size: 1.2em;
-			}
+			min-width: 50px;
+			align-self: stretch;
+			contain: size;
 		}
 
 		i.material-icons {
@@ -45,9 +49,7 @@ body > main.dkp {
 
 		.amount {
 			white-space: nowrap;
-			font-size: 1.2em;
 			font-family: "SF Pro Display", sans-serif;
-			padding: 0 8px;
 		}
 	}
 
@@ -103,11 +105,20 @@ body > main.dkp-account {
 			outline: 0;
 		}
 
-		i.has-details {
+		i.has-details, td>i {
 			font-size: 14px;
 			vertical-align: middle;
 			margin-left: 8px;
 			opacity: .5;
+		}
+
+		tr.hold {
+			font-style: italic;
+
+			td:nth-child(2) {
+				color: #848484;
+				font-weight: 400;
+			}
 		}
 
 		tr.details table {

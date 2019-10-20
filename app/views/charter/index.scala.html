@@ -1,0 +1,42 @@
+@(sections: Seq[Section])(implicit request: DashRequest[_])
+
+@layout.main("charter") {
+	<article class="toc">
+		<header>
+			<h3>Sommaire</h3>
+		</header>
+		<main>
+			<ol>
+			@for(section <- sections) {
+				<li><a href="#section-@section.id">@section.title</a></li>
+			}
+			</ol>
+		</main>
+	</article>
+
+	<div class="content">
+		@for(section <- sections) {
+			<article>
+				<a id="section-@section.id"></a>
+				<header>
+					<h3>@section.title</h3>
+					@if(request.user.isOfficer) {
+						<span class="actions">
+							<a href="@routes.CharterController.moveUp(section.id)" class="up"><i class="material-icons">keyboard_arrow_up</i></a>
+							<a href="@routes.CharterController.moveDown(section.id)" class="down"><i class="material-icons">keyboard_arrow_down</i></a>
+							<a href="@routes.CharterController.edit(Some(section.id))"><i class="material-icons">edit</i></a>
+						</span>
+					}
+				</header>
+				<main>
+				@Html(section.html)
+				</main>
+			</article>
+		}
+		@if(request.user.isOfficer) {
+			<div style="text-align: center; margin: 8px;">
+				<a href="@routes.CharterController.edit()"><i class="material-icons">add</i></a>
+			</div>
+		}
+	</div>
+}

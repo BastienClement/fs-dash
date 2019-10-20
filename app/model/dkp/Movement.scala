@@ -1,9 +1,10 @@
-package model
+package model.dkp
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneId}
 import java.util.Locale
 
+import model.Snowflake
 import play.twirl.api.Html
 
 case class Movement(

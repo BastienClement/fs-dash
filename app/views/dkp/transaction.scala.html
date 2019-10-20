@@ -1,3 +1,4 @@
+@import model.dkp.{Account, Movement, Transaction}
 @(transaction: Transaction, movements: Seq[(Movement, Account)], addMovementForm: Form[DkpController.AddMovement], accounts: Seq[(String, String)])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
 
 @layout.main("dkp-transaction") {
@@ -50,13 +51,13 @@
             <header>
                 <h3>Ajouter un mouvement</h3>
             </header>
-            @helper.form(action = routes.DkpController.transactionPost(transaction.id)) {
+            @helper.form(action = routes.DkpController.createMovement(Some(transaction.id), None)) {
                 @helper.CSRF.formField
-                @helper.select(addMovementForm("accounts"), accounts, 'multiple -> true)
-                @helper.inputText(addMovementForm("label"), 'maxlength -> 20)
+                @helper.select(addMovementForm("accounts"), accounts, Symbol("multiple") -> true)
+                @helper.inputText(addMovementForm("label"), Symbol("maxlength") -> 30)
                 @helper.textarea(addMovementForm("details"))
-                @helper.inputText(addMovementForm("amount"), 'cleave -> "dkp")
-                @helper.inputText(addMovementForm("item"), 'cleave -> "item")
+                @helper.inputText(addMovementForm("amount"), Symbol("cleave") -> "dkp")
+                @helper.inputText(addMovementForm("item"), Symbol("cleave") -> "item")
                 <div class="actions">
                     <button type="submit">Ajouter</button>
                 </div>

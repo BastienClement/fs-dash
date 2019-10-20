@@ -1,7 +1,7 @@
-package model
+package model.dkp
 
 import db.api._
-import model.DkpAmount.numeric
+import model.dkp.DkpAmount.numeric
 import play.api.data.FormError
 import play.api.data.format.{Formats, Formatter}
 import play.api.libs.json.{Format, Reads, Writes}
@@ -36,6 +36,13 @@ case class DkpAmount(value: Int) extends AnyVal {
 
   def +(other: DkpAmount): DkpAmount = numeric.plus(this, other)
   def -(other: DkpAmount): DkpAmount = numeric.minus(this, other)
+
+  def *(times: Int): DkpAmount = DkpAmount(value * times)
+
+  def <(other: DkpAmount): Boolean  = value < other.value
+  def <=(other: DkpAmount): Boolean = value <= other.value
+  def >(other: DkpAmount): Boolean  = value > other.value
+  def >=(other: DkpAmount): Boolean = value >= other.value
 
   def html: Html =
     Html(s"""<span class="dkp${if (value < 0) " negative" else ""}">

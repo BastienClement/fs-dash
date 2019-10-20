@@ -1,0 +1,128 @@
+@(orders: Seq[(model.auctions.OrderOverview, WowItem)], mines: Seq[(model.auctions.Order, model.WowItem)], matches: Seq[(model.auctions.Match, Option[Snowflake], Option[Snowflake], WowItem)], pending: Int)(implicit request: DashRequest[_])
+
+@layout.main("auctions") {
+	<article style="flex: 1;">
+		<header>
+			<h3>Offres ouvertes</h3>
+			<a href="@routes.AuctionsController.create()"><i class="material-icons">add</i></a>
+			<a href=""><i class="material-icons">refresh</i></a>
+		</header>
+		<div class="table-container">
+			<table class="tabular">
+				<thead>
+					<tr>
+						<th colspan="2" class="border-right"></th>
+						<th colspan="3" style="width: 20%;" class="center border-left border-right">Vendeurs</th>
+						<th colspan="3" style="width: 20%;" class="center border-left">Acheteurs</th>
+					</tr>
+					<tr>
+						<th style="width: 1%;">Item</th>
+						<th style="width: 50%;"></th>
+						<th class="right border-left" style="width: 10%">Unités</th>
+						<th></th>
+						<th style="width: 10%">Prix min.</th>
+						<th class="right border-left" style="width: 10%">Unités</th>
+						<th></th>
+						<th style="width: 10%">Prix max.</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for((order, item) <- orders) {
+						<tr style="cursor: pointer" auction-link="@routes.AuctionsController.item(item.id)">
+							<td><span class="wh-medium-border scaled"><img src="@item.mediumIconUrl"></span></td>
+							<td class="border-right q@item.quality">@item.link</td>
+							<td class="border-left right">@order.askUnits</td>
+							<td>×</td>
+							<td class="border-right">@order.askPrice.map(_.html).getOrElse("–")</td>
+							<td class="border-left right">@order.bidUnits</td>
+							<td>×</td>
+							<td>@order.bidPrice.map(_.html).getOrElse("–")</td>
+						</tr>
+					}
+					@if(orders.isEmpty) {
+						<tr class="no-hover">
+							<td colspan="8" style="padding: 24px">Aucune offre n'est actuellement disponible.</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</article>
+	<article style="flex: 0.9;" class="my-operations">
+		<header>
+			<h3>Mes opérations</h3>
+			@if(request.user.isOfficer) {
+				<span class="capsule" style="margin-right: 8px">
+					@pending
+				</span>
+				<a href="@routes.AuctionsController.pending()"><i class="material-icons">done_all</i></a>
+			}
+			<!--<a href="@routes.AuctionsController.history()"><i class="material-icons">history</i></a>-->
+		</header>
+		<table class="tabular">
+			<thead>
+				<tr>
+					<th class="fit">Status</th>
+					<th colspan="2">Item</th>
+					<th class="fit right">Prix unit.</th>
+					<th class="fit"></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@for((m, bidder, asker, item) <- matches) {
+					<tr>
+						<td class="class-3">
+							@if(bidder.contains(request.user.id)) {
+								Acheté
+							} else {
+								Vendu
+							}
+						</td>
+						<td class="fit"><span class="wh-small-border scaled"><img src="@item.smallIconUrl"></span></td>
+						<td class="fit"><span class="q@item.quality">@item.link</span> × @m.quantity</td>
+						<td class="right">@m.price.html</td>
+						<td></td>
+						<td>
+						@if(bidder.contains(request.user.id)) {
+							<span class="italic">
+								<i class="material-icons">hourglass_empty</i>
+								En attente de réception par les officiers
+							</span>
+						} else {
+							<span class="class-11">
+								<i class="material-icons">error_outline</i>
+								<span>À envoyer à un officier in-game</span>
+							</span>
+						}
+						</td>
+					</tr>
+				}
+				@for((order, item) <- mines; (timer, _) = AuctionsController.formatTimer(order, None)) {
+					<tr style="cursor: pointer" auction-link="@routes.AuctionsController.item(item.id)">
+						<td class="class-4">
+						@if(order.kind == "bid") {
+							Achat
+						} else {
+							Vente
+						}
+						</td>
+						<td class="fit"><span class="wh-small-border scaled"><img src="@item.smallIconUrl"></span></td>
+						<td class="fit"><span class="q@item.quality">@item.link</span> × @order.remaining</td>
+						<td class="right">@order.price.html</td>
+						<td></td>
+						<td><div style="opacity: 0.5;">@timer</div></td>
+					</tr>
+				}
+				@if(mines.isEmpty && matches.isEmpty) {
+					<tr class="no-hover">
+						<td colspan="6" style="padding: 24px;">
+							Vous n'avez aucune opération en cours ou en attente.
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</article>
+	<script src="@routes.Assets.versioned("javascripts/dash-auctions.js")" defer></script>
+}

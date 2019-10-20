@@ -1,9 +1,10 @@
-package db
+package db.dkp
 
 import java.time.Instant
 
 import db.api._
-import model.{DkpAmount, Movement, Snowflake}
+import model.Snowflake
+import model.dkp.{DkpAmount, Movement}
 
 class Movements(tag: Tag) extends Table[Movement](tag, "dkp_movements") {
   def id          = column[Snowflake]("id", O.PrimaryKey)

@@ -1,7 +1,8 @@
-package db
+package db.dkp
 
 import db.api._
-import model.{Snowflake, Transaction}
+import model.Snowflake
+import model.dkp.Transaction
 
 class Transactions(tag: Tag) extends Table[Transaction](tag, "dkp_transactions") {
   def id      = column[Snowflake]("id", O.PrimaryKey)

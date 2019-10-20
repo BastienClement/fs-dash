@@ -1,3 +1,5 @@
+import java.util.TimeZone
+
 import com.google.inject.AbstractModule
 
 /**
@@ -12,6 +14,7 @@ import com.google.inject.AbstractModule
   */
 class Module extends AbstractModule {
   override def configure() = {
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     /*
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
