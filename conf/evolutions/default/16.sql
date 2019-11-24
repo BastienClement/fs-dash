@@ -2,6 +2,9 @@
 
 INSERT INTO dkp_decay_config (key, value) VALUES ('trade_tax', 0.075);
 
+INSERT INTO wow_items (id, name, quality, icon, fetched, stale, data)
+VALUES (0, 'Golds', 1, 'inv_misc_coin_01', NOW(), false, 'null');
+
 CREATE OR REPLACE FUNCTION auctions_matches_on_update() RETURNS TRIGGER AS
 $$
 DECLARE
@@ -59,3 +62,4 @@ $$ LANGUAGE plpgsql;
 -- !Downs
 
 DELETE FROM dkp_decay_config WHERE key = 'trade_tax';
+DELETE FROM wow_items WHERE id = 0;

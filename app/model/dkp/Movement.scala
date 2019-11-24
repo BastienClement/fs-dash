@@ -22,7 +22,16 @@ case class Movement(
   def humanDate: String = Movement.formatter.format(date)
 
   def itemLink: Html =
-    item.fold(Html(""))(id => Html(s"""<a href="https://classic.wowhead.com/item=$id" class="whlink"></a>"""))
+    item.fold(Html("")) {
+      case id if id > 0 =>
+        Html(s"""<a href="https://classic.wowhead.com/item=$id" class="whlink"></a>""")
+      case id if id == 0 =>
+        Html(s"""<a class="whlink icontinyl q1" data-wh-icon-added="true" style="padding-left: 18px !important;
+                |background: url(https://wow.zamimg.com/images/wow/icons/tiny/inv_misc_coin_01.gif) left center no-repeat;
+                |"><span>Golds</span></a>""".stripMargin)
+      case _ =>
+        Html("")
+    }
 }
 
 object Movement {

@@ -52,6 +52,7 @@ GET         /dkp/manage/edit/:id                   controllers.DkpController.man
 GET         /dkp/create-account                    controllers.DkpController.createAccount
 POST        /dkp/create-account                    controllers.DkpController.createAccountPost
 GET         /dkp/account/:id                       controllers.DkpController.account(id: model.Snowflake, date: Option[Long] ?= None)
+POST        /dkp/account/:id/send                  controllers.DkpController.sendAmount(id: model.Snowflake)
 GET         /dkp/create-transaction                controllers.DkpController.createTransaction
 POST        /dkp/create-transaction                controllers.DkpController.createTransactionPost
 GET         /dkp/transaction/:id                   controllers.DkpController.transaction(id: model.Snowflake)

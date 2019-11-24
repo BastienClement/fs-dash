@@ -122,10 +122,15 @@ class DkpController extends DashController {
 
   def account(id: Snowflake, date: Option[Long] = None): Action[AnyContent] = DashAction.authenticated.async {
     implicit req =>
-      accountPage(id, date, DkpController.addMovementForm)
+      accountPage(id, date, DkpController.addMovementForm, DkpController.sendAmountForm)
   }
 
-  def accountPage(id: Snowflake, date: Option[Long] = None, form: Form[DkpController.AddMovement])(
+  def accountPage(
+      id: Snowflake,
+      date: Option[Long] = None,
+      form: Form[DkpController.AddMovement],
+      sendForm: Form[DkpController.SendAmount]
+  )(
       implicit req: DashRequest[_]
   ): DBIOAction[Result, NoStream, R] = {
     val timezone = ZoneId.of("Europe/Paris")
@@ -154,7 +159,8 @@ class DkpController extends DashController {
       movements  <- detailedMovementsData.result.map(ms => ms.map(DetailedMovement.tupled))
       holds      <- if (isFuture) Holds.filter(h => h.account === id).sortBy(_.id).result else DBIO.successful(Seq.empty)
       hasAccess  <- AccountAccesses.filter(aa => aa.account === id && aa.owner === req.user.id).exists.result
-      accounts   <- accountsList
+      accounts   <- accountsList(a => a.id =!= id)
+      tradeTax   <- DecayConfig.tradeTax
     } yield {
       optAccount.fold(NotFound(views.html.error("Erreur", Some("Ce compte n'existe pas."))))(account => {
         val previous = dateStart.atZone(timezone).minusMonths(1).toInstant.toEpochMilli
@@ -167,10 +173,12 @@ class DkpController extends DashController {
             holds,
             hasAccess,
             ("", "") +: accounts,
+            tradeTax,
             previous,
             next,
             DateTimeFormatter.ofPattern("MMM YYYY").withZone(timezone).format(dateStart),
-            form
+            form,
+            sendForm
           )
         )
       })
@@ -189,7 +197,7 @@ class DkpController extends DashController {
           errors => {
             (id, account) match {
               case (Some(tid), _) => transactionPage(tid, errors)
-              case (_, Some(aid)) => accountPage(aid, None, errors)
+              case (_, Some(aid)) => accountPage(aid, None, errors, DkpController.sendAmountForm)
             }
           },
           data => {
@@ -216,6 +224,63 @@ class DkpController extends DashController {
         )
     }
 
+  def sendAmount(id: Snowflake) = DashAction.authenticated.async { implicit req =>
+    AccountAccesses
+      .filter(aa => aa.account === id && aa.owner === req.user.id)
+      .exists
+      .result
+      .flatMap {
+        case true =>
+          DkpController.sendAmountForm
+            .bindFromRequest()
+            .fold(
+              errors => accountPage(id, None, DkpController.addMovementForm, errors),
+              data => {
+                assert(data.amount.value > 0)
+                (Accounts.filter(a => a.id === id).result.head zip Accounts.filter(a => a.id === data.account).result.head zip DecayConfig.tradeTax).flatMap {
+                  case ((account, recipient), tradeTax) =>
+                    account.available >= data.amount match {
+                      case true =>
+                        def tradeMovement(account: Snowflake, amount: DkpAmount, details: String) =
+                          Movement(
+                            Snowflake.next,
+                            Instant.now,
+                            account,
+                            None,
+                            "Échange",
+                            amount,
+                            DkpAmount.dummy,
+                            details,
+                            Some(req.user.id),
+                            None
+                          )
+
+                        (Movements ++= Seq(
+                          tradeMovement(data.account, data.amount * (1 - tradeTax), data.details),
+                          tradeMovement(id, -data.amount, s"${recipient.label}: ${data.details}")
+                        )).transactionally.map(_ => Redirect(routes.DkpController.account(id)))
+                      case false =>
+                        DBIO.successful(
+                          Ok(
+                            views.html
+                              .error(
+                                "Solde insufisant",
+                                Some("Vous n'avez pas assez de DKP pour effectuer cet échange.")
+                              )
+                          )
+                        )
+                    }
+                }
+              }
+            )
+
+        case false =>
+          DBIO.successful(
+            Ok(views.html.error("Non autorisé", Some("Vous ne pouvez pas envoyer de DKP depuis ce compte.")))
+          )
+      }
+  }
+
   private def transactionPage[A](id: Snowflake, form: Form[DkpController.AddMovement])(
       implicit req: DashRequest[A]
   ): DBIOAction[Result, NoStream, R] = {
@@ -227,7 +292,7 @@ class DkpController extends DashController {
                     .on { case (m, a) => m.account === a.id }
                     .sortBy { case (m, _) => m.id }
                     .result
-      accounts <- accountsList
+      accounts <- accountsList()
     } yield {
       optTransaction.fold(NotFound(views.html.error("Erreur", Some("Cette transaction n'existe pas.")))) {
         transaction =>
@@ -236,12 +301,18 @@ class DkpController extends DashController {
     }
   }
 
-  private def accountsList: DBIOAction[Seq[(String, String)], NoStream, R] = {
+  private def accountsList(
+      filter: Accounts => Rep[Boolean] = (_ => true)
+  ): DBIOAction[Seq[(String, String)], NoStream, R] = {
     Accounts
-      .filter(a => !a.archived)
-      .map(a => a.id -> a.label)
+      .filter(a => !a.archived && filter(a))
+      .joinLeft(Users)
+      .on { case (a, u) => AccountAccesses.filter(aa => aa.account === a.id && aa.owner === u.id && aa.main).exists }
       .result
-      .map(_.map { case (id, label) => id.toString -> label })
+      .map(_.map {
+        case (a, Some(u)) if u.isPvP => a.id.toString -> a.label
+        case (a, _)                  => a.id.toString -> s"${a.label}*"
+      })
   }
 
   def createAccount: Action[AnyContent] = DashAction.officers { implicit req =>
@@ -333,6 +404,20 @@ object DkpController {
       "amount"      -> of[DkpAmount],
       "item"        -> optional(number(min = 1))
     )(AddMovement.apply)(AddMovement.unapply)
+  )
+
+  case class SendAmount(
+      account: Snowflake,
+      details: String,
+      amount: DkpAmount
+  )
+
+  val sendAmountForm = Form(
+    mapping(
+      "Destinataire" -> of[Snowflake],
+      "Détails"      -> text,
+      "Montant"      -> of[DkpAmount]
+    )(SendAmount.apply)(SendAmount.unapply)
   )
 
   case class DetailedMovement(

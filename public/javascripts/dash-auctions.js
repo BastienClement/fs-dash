@@ -1,6 +1,6 @@
 $("#item-id").on("keyup", $.debounce(500, function () {
 	var id = parseInt(this.value);
-	if (!id) return;
+	if (!id || id < 1) return;
 
 	var $output = $("#item-output");
 	var $content = $("main", $output);

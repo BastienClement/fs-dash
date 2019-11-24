@@ -37,7 +37,10 @@ case class DkpAmount(value: Int) extends AnyVal {
   def +(other: DkpAmount): DkpAmount = numeric.plus(this, other)
   def -(other: DkpAmount): DkpAmount = numeric.minus(this, other)
 
+  def unary_- : DkpAmount = DkpAmount(-value)
+
   def *(times: Int): DkpAmount = DkpAmount(value * times)
+  def *(factor: Double): DkpAmount = DkpAmount((value * factor).toInt)
 
   def <(other: DkpAmount): Boolean  = value < other.value
   def <=(other: DkpAmount): Boolean = value <= other.value

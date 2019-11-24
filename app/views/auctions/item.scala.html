@@ -5,7 +5,11 @@
 		<header>
 			<h3>
 				<span class="wh-medium-border" style="margin-right: 8px;"><img src="@item.mediumIconUrl"/></span>
-				<a href="https://classic.wowhead.com/item=@item.id" data-wowhead="" class="q@item.quality">@item.name</a>
+				@if(item.id > 0) {
+					<a href="https://classic.wowhead.com/item=@item.id" data-wowhead="" class="q@item.quality">@item.name</a>
+				} else {
+					@item.name
+				}
 			</h3>
 			<a href=""><i class="material-icons">refresh</i></a>
 		</header>
@@ -66,10 +70,12 @@
 					<input type="radio" id="kind-ask" name="kind" value="bid" />
 					<span>Acheter</span>
 				</label>
-				<label>
-					<input type="radio" id="kind-ask" name="kind" value="ask" />
-					<span>Vendre</span>
-				</label>
+				@if(!request.user.isTrial) {
+					<label>
+						<input type="radio" id="kind-ask" name="kind" value="ask" />
+						<span>Vendre</span>
+					</label>
+				}
 			</div>
 			@if(accounts.size > 1) {
 				<dl disabled>

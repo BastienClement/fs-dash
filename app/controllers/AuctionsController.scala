@@ -8,7 +8,7 @@ import db.auctions.{Matches, OrderOverviews, Orders, PendingMatches}
 import db.dkp.{AccountAccesses, Accounts, DecayConfig}
 import db.{Users, WowItems}
 import javax.inject._
-import model.auctions.{Match, Order, PendingMatch}
+import model.auctions.{Match, Order, OrderOverview, PendingMatch}
 import model.dkp.{Account, DkpAmount}
 import model.{Snowflake, User, WowItem}
 import play.api.libs.json.Json
@@ -26,7 +26,7 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
       orders <- OrderOverviews
                  .join(WowItems)
                  .on { case (o, i) => o.item === i.id }
-                 .sortBy { case (_, i) => i.name }
+                 .sortBy { case (_, i) => ((i.id < 1).desc, i.name) }
                  .result
       mines <- Orders
                 .filter(o => o.owner === req.user.id && o.closed.isEmpty)
@@ -42,8 +42,15 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
                 } yield (m, bid.owner, ask.owner, item)).sortBy(_._1.matched).result
       pending <- if (req.user.isOfficer) Matches.filter(m => m.ackStatus.isEmpty).size.result
                 else DBIO.successful(0)
+      gold <- WowItems.filter(i => i.id === 0).result.head
     } yield {
-      Ok(views.html.auctions.index(orders, mines, matches, pending))
+      Ok(views.html.auctions.index(
+        if (orders.exists { case (_, i) => i.id == 0 }) orders
+        else ((OrderOverview(0, 0, None, 0, None), gold)) +: orders,
+        mines,
+        matches,
+        pending
+      ))
     }
   }
 
@@ -115,6 +122,7 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
     val delay = form("delay").head.toInt
 
     assert(Set("ask", "bid").contains(kind))
+    assert(!req.user.isTrial || kind == "bid")
     assert(account.isDefined || guildOrder)
     assert(quantity > 0)
     assert(price > DkpAmount(0))

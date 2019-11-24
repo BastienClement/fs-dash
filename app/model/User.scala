@@ -13,6 +13,8 @@ case class User(
   def isAdmin: Boolean       = roles.intersect(Set(User.RoleAdmin, User.RoleGuildMaster)).nonEmpty
   def isOfficer: Boolean     = isAdmin || roles.contains(User.RoleOfficer)
   def isMember: Boolean      = isOfficer || roles.intersect(Set(User.RolePvP, User.RolePvE, User.RoleTrial)).nonEmpty
+  def isPvP: Boolean         = isOfficer || roles.intersect(Set(User.RolePvP, User.RoleTrial)).nonEmpty
+  def isTrial: Boolean       = roles.contains(User.RoleTrial)
   def isFromScratch: Boolean = isMember || roles.intersect(User.roles).nonEmpty
 
   def color: String =
@@ -42,8 +44,8 @@ object User {
   val RoleAdmin       = Snowflake(608756668192260097L)
   val RoleGuildMaster = Snowflake(584304037365678091L)
   val RoleOfficer     = Snowflake(584304138855383041L)
-  val RolePvP      = Snowflake(642351734840360990L)
-  val RolePvE = Snowflake(584304255490457600L)
+  val RolePvP         = Snowflake(642351734840360990L)
+  val RolePvE         = Snowflake(584304255490457600L)
   val RoleTrial       = Snowflake(607650376036122710L)
   val RoleCasual      = Snowflake(614613591672487946L)
 
