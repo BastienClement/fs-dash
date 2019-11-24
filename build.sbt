@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   "com.github.tminglei"      %% "slick-pg"                 % "0.18.0",
   "com.github.tminglei"      %% "slick-pg_play-json"       % "0.18.0",
   "com.atlassian.commonmark" % "commonmark"                % "0.13.0",
-  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.13.0"
+  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.13.0",
+  "com.google.cloud"         % "google-cloud-vision"       % "1.97.0"
 )
 
 pipelineStages := Seq(digest, gzip)

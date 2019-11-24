@@ -28,6 +28,16 @@ main article {
 		}
 	}
 
+	&.warning {
+		border-color: #C78F4840;
+		background-color: #C78F4840;
+
+		header {
+			background-color: #C78F4840;
+			border-color: #C78F4840;
+		}
+	}
+
 	header {
 		background: $background-color;
 		padding: 8px;

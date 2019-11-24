@@ -36,6 +36,8 @@ body > main.dkp {
 			min-width: 50px;
 			align-self: stretch;
 			contain: size;
+			display: flex;
+			align-items: center;
 		}
 
 		i.material-icons {
@@ -50,6 +52,35 @@ body > main.dkp {
 		.amount {
 			white-space: nowrap;
 			font-family: "SF Pro Display", sans-serif;
+			text-align: right;
+			display: flex;
+			align-items: center;
+
+			.fractional {
+				display: none;
+			}
+
+			.dkp {
+				min-width: 26px;
+			}
+		}
+
+		.minimum-bid {
+			font-size: 10px;
+			opacity: 0.5;
+			font-weight: 300;
+			margin-right: 5px;
+			font-variant-numeric: tabular-nums;
+
+			&::before {
+				content: "(";
+				margin-right: 1px;
+			}
+
+			&::after {
+				content: ")";
+				margin-left: 1px;
+			}
 		}
 	}
 

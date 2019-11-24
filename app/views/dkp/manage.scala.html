@@ -21,6 +21,7 @@
 					<th></th>
 					<th class="fit right">Overdraft</th>
 					<th></th>
+					<th class="fit center">Roster</th>
 					<th class="fit center">Archivé</th>
 					<th class="fit center">Decay</th>
 					<th></th>
@@ -38,6 +39,12 @@
 					<td></td>
 					<td class="right">@account.overdraft.html</td>
 					<td></td>
+					<td class="center">
+						<form action="@routes.DkpController.manageRoster(account.id)" method="get">
+							<input data-action="toggle-roster" name="state" value="true" type="checkbox" style="margin-top: 0"
+								@checkedAttribute(account.roster) onchange="this.form.submit()" />
+						</form>
+					</td>
 					<td class="center">
 						<form action="@routes.DkpController.manageArchived(account.id)" method="get">
 							<input data-action="toggle-archived" name="state" value="true" type="checkbox" style="margin-top: 0"

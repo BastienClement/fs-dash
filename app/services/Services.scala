@@ -5,5 +5,6 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class Services @Inject()(
     val discordService: DiscordService,
-    val wowheadService: WowheadService
+    val bnetService: BnetService,
+    val vision: Vision
 )

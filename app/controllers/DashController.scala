@@ -41,7 +41,7 @@ class DashController extends BaseController with play.api.i18n.I18nSupport {
                     case Success(user) => DBIO.successful(Some(user))
                     case Failure(_)    => Sessions.filter(s => s.id === session.id).delete andThen DBIO.successful(None)
                   }
-                case Some(session) if session.lastChecked isBefore Instant.now.minusSeconds(5 * 60) =>
+                case Some(session) if session.lastChecked isBefore Instant.now.minusSeconds(15 * 60) =>
                   (refreshUser(session) andThen DBIO.successful(session.owner)).asTry.flatMap {
                     case Success(user) => DBIO.successful(Some(user))
                     case Failure(_)    => Sessions.filter(s => s.id === session.id).delete andThen DBIO.successful(None)

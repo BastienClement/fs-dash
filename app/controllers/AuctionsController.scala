@@ -1,11 +1,11 @@
 package controllers
 
-import java.time.Instant
+import java.time.{Instant, ZoneId}
 
 import controllers.AuctionsController.{DetailedMatch, ItemOrder}
 import db.api._
 import db.auctions.{Matches, OrderOverviews, Orders, PendingMatches}
-import db.dkp.{AccountAccesses, Accounts}
+import db.dkp.{AccountAccesses, Accounts, DecayConfig}
 import db.{Users, WowItems}
 import javax.inject._
 import model.auctions.{Match, Order, PendingMatch}
@@ -56,7 +56,7 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
   }
 
   def fetchItem(id: Int) = DashAction.authenticated.async { implicit req =>
-    services.wowheadService
+    services.bnetService
       .fetchItem(id)
       .transform {
         case Success(item) => Success(Json.obj("item" -> item))
@@ -74,12 +74,13 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
                  .on { case (o, u) => o.owner === u.id }
                  .result
       nextMatch <- PendingMatches.filter(m => m.item === id).sortBy(_.execution).result.headOption
+      tradeTax  <- DecayConfig.tradeTax
     } yield {
       optItem match {
         case None =>
           NotFound(views.html.error("Item non-trouvé", Some("Cet object n'existe pas dans la base de données.")))
         case Some(item) =>
-          Ok(views.html.auctions.item(item, req.accounts, processOrders(orders, nextMatch)))
+          Ok(views.html.auctions.item(item, req.accounts, processOrders(orders, nextMatch), tradeTax))
       }
     }
   }
@@ -109,7 +110,7 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
     val guildOrder = form.get("guild-order").isDefined && req.user.isOfficer
 
     val quantity = form("quantity").head.replaceAll("[^0-9]", "").toInt
-    val price    = DkpAmount((form("price").head.replaceAll("[^0-9]", "").toFloat * 100).toInt)
+    val price    = DkpAmount((form("price").head.replaceAll("[^0-9\\.]", "").toFloat * 100).toInt)
 
     val delay = form("delay").head.toInt
 
@@ -132,8 +133,29 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
           .head
           .map(a => kind == "ask" || (a.withdrawLimit >= (price * quantity)))
 
-    (canAccessAccount zip accountHasFunds).flatMap {
-      case (true, true) =>
+    val conflictingOffers =
+      Orders
+        .filter(o => o.item === id && o.kind === kind && o.closed.isEmpty)
+        .filter(o => !(o.priceInt === price.value) && ((o.priceInt - price.value).abs < (o.priceInt * 5 / 100)))
+        .exists
+        .result
+
+    val validity =
+      if (delay > 0)
+        Instant
+          .now()
+          .minusSeconds(60 * 60 * 6)
+          .atZone(ZoneId.of("Europe/Paris"))
+          .toLocalDate
+          .plusDays(delay)
+          .atTime(20, 0)
+          .atZone(ZoneId.of("Europe/Paris"))
+          .toInstant
+      else
+        Instant.now()
+
+    (canAccessAccount zip accountHasFunds zip conflictingOffers).flatMap {
+      case ((true, true), false) =>
         val order = Order(
           id = Snowflake.next,
           kind = kind,
@@ -145,13 +167,17 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
           price = price,
           hold = None,
           posted = Instant.now,
-          validity = Instant.now.plusSeconds(delay * 60 * 60L),
+          validity = validity,
           closed = None
         )
         (Orders += order) andThen DBIO.successful(Redirect(routes.AuctionsController.item(id)))
-      case (false, _) =>
+      case (_, true) =>
+        DBIO.successful(
+          BadRequest(views.html.error("Erreur", Some("Votre offre est trop proche d'une offre existante.")))
+        )
+      case ((false, _), _) =>
         DBIO.successful(BadRequest(views.html.error("Erreur", Some("Vous n'avez pas accès à ce compte"))))
-      case (_, false) =>
+      case ((_, false), _) =>
         DBIO.successful(BadRequest(views.html.error("Erreur", Some("Solde insufisant"))))
     }
   }
@@ -197,7 +223,9 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
       .result
       .map { rows =>
         import AuctionsController.formatUser
-        rows.map { case (m, a, b, i) => (m, formatUser(a), formatUser(b), i) }
+        rows
+          .map { case (m, a, b, i) => (m, formatUser(a), formatUser(b), i) }
+          .sortBy { case (m, _, _, _) => m.id.value }
       }
   }
 }

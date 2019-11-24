@@ -9,10 +9,12 @@ case class Account(
     balance: DkpAmount,
     archived: Boolean,
     useDecay: Boolean,
+    roster: Boolean,
     overdraft: DkpAmount,
     holds: DkpAmount = DkpAmount(0)
 ) {
   def available: DkpAmount     = balance - holds
+  def minimumBid: Int          = (balance.value * 0.001).ceil.toInt.max(30)
   def withdrawLimit: DkpAmount = available + overdraft
 }
 

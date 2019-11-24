@@ -11,11 +11,12 @@ class Accounts(tag: Tag) extends Table[Account](tag, "dkp_accounts_view") {
   def balance   = column[DkpAmount]("balance")
   def archived  = column[Boolean]("archived")
   def useDecay  = column[Boolean]("use_decay")
+  def roster    = column[Boolean]("roster")
   def overdraft = column[DkpAmount]("overdraft")
   def holds     = column[DkpAmount]("holds", O.AutoInc)
 
   override def * =
-    (id, label, color, balance, archived, useDecay, overdraft, holds) <>
+    (id, label, color, balance, archived, useDecay, roster, overdraft, holds) <>
       ((Account.apply _).tupled, Account.unapply)
 }
 

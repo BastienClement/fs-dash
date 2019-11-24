@@ -49,6 +49,7 @@ $(function () {
 
 	if ($orderForm.length < 1) return;
 
+	var $warnBlock = $(".warning", $orderForm);
 	var $errorBlock = $(".error", $orderForm);
 	var $sendButton = $("#item-create-button", $orderForm);
 
@@ -69,25 +70,81 @@ $(function () {
 		$("select[name=account]").attr("disabled", this.checked ? "disabled" : null);
 	});
 
+	function formatAmount(amount) {
+		var int = Math.floor(amount / 100);
+		var fractional = amount % 100;
+		return "" + int + "." + (fractional < 10 ? "0" : "") + fractional;
+	}
+
+	function min(a, b) { return a <= b ? a : b; }
+
+	function max(a, b) { return a >= b ? a : b; }
+
+	function toFixed(a) { return Math.round(a * 100); }
+
+	bids = bids.map(toFixed);
+	asks = asks.map(toFixed);
+
 	function checkFormStatus() {
 		var orderKind = $("input[name=kind]:checked").val();
 		var guildOrder = !!$("input[name=guild-order]:checked", $orderForm).val();
 
 		var accountSelect = $("select[name=account]")[0];
-		var withdrawLimit = parseFloat(accountSelect
+		var withdrawLimit = toFixed(parseFloat(accountSelect
 			? accountSelect.selectedOptions[0].dataset.withdrawLimit
-			: $("input[name=account]")[0].dataset.withdrawLimit);
+			: $("input[name=account]")[0].dataset.withdrawLimit));
 
-		var quantity = parseInt($("input[name=quantity]").val().replace(/[^0-9]/g, ""));
-		var price = parseFloat($("input[name=price]").val().replace(/[^0-9]/g, ""));
+		var quantity = parseInt($("input[name=quantity]").val().replace(/[^0-9\.]/g, ""));
+		var price = toFixed(parseFloat($("input[name=price]")
+			.attr("placeholder",
+				orderKind ?
+					formatAmount(orderKind === "bid"
+						? Math.ceil(bids.length ? bids.reduce(max) * 1.05 : 0)
+						: Math.floor(asks.length ? asks.reduce(min) * 0.95 : 0))
+					: null)
+			.val().replace(/[^0-9\.]/g, "")));
 
 		var isValid = quantity && price;
+		var errorText = null;
+		var warnText = null;
 
-		var showError = isValid && orderKind === "bid" && !guildOrder && (quantity * price > withdrawLimit);
-		if (showError) $errorBlock.show(); else $errorBlock.hide();
+		if (isValid) {
+			if (orderKind === "bid" && !guildOrder && (quantity * price > withdrawLimit)) {
+				errorText = "Le montant total est supérieur au solde de DKP disponibles.";
+			} else {
+				var others = (orderKind === "bid" ? bids : asks) || [];
+				if (others.indexOf(price) < 0) {
+					var conflicts = others.filter(function (existing) {
+						return Math.abs(existing - price) < (0.05 * existing);
+					});
 
-		var canSend = isValid && !showError;
-		$sendButton.attr("disabled", canSend ? null : "disabled");
+					if (conflicts.length) {
+						errorText = "Votre offre est trop proche d'une offre existante.";
+
+						var minOffer = others.reduce(min);
+						var maxOffer = others.reduce(max);
+						var minTarget = Math.floor(minOffer * 0.95);
+						var maxTarget = Math.ceil(maxOffer * 1.05);
+
+						if (minTarget < price && price < minOffer) {
+							errorText += "\nSous-enchère minimum: " + formatAmount(minTarget);
+						} else if (maxTarget > price && price > maxOffer) {
+							errorText += "\nSur-enchère minimum: " + formatAmount(maxTarget);
+						}
+					}
+				}
+			}
+
+			if (orderKind === "ask") {
+				var tax = Math.round(quantity * price * tradeTax);
+				warnText = "Commission: <b>" + formatAmount(tax) + "</b>;  Montant reçu: <b>" + formatAmount(quantity * price - tax)
+					+ "</b>\n<em>(Ne s'applique pas à une vente à la guilde)</em>";
+			}
+		}
+
+		if (warnText) $warnBlock.html(warnText).show(); else $warnBlock.hide();
+		if (errorText) $errorBlock.text(errorText).show(); else $errorBlock.hide();
+		$sendButton.attr("disabled", isValid && !errorText ? null : "disabled");
 	}
 
 	checkFormStatus();

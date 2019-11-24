@@ -1,40 +1,67 @@
-@import model.dkp.Transaction
-@import model.dkp.Account
-@import model.dkp.AccountAccess
-@import model.dkp.DkpAmount
-@(accounts: Seq[Seq[Account]], count: Int, total: DkpAmount, mines: Seq[(Account, AccountAccess)], transactions: Seq[Transaction])(implicit request: DashRequest[_])
+@import model.dkp.{Account, AccountAccess, DkpAmount, Transaction}
+@(rosterAccounts: Seq[Seq[Account]], rosterCount: Int, casualAccounts: Seq[Seq[Account]], casualCount: Int, count: Int, total: DkpAmount, mines: Seq[(Account, AccountAccess)], transactions: Seq[Transaction])(implicit request: DashRequest[_])
 
 @layout.main("dkp") {
-	<article class="accounts">
-		<header>
-			<h3>Comptes</h3>
-			Nombre: <span class="capsule" style="margin-left: 4px; margin-right: 8px;">@count</span>
-			Total: <span class="capsule" style="margin-left: 4px;">@total</span>
-			@if(request.user.isOfficer) {
-				<a href="@routes.DkpController.manage()">
-				<i class="material-icons" style="margin-left: 8px;">settings_applications</i></a>
-			}
-		</header>
-		<main>
-			@for(group <- accounts) {
-				<div class="accounts-group">
-				@for(account <- group) {
-					<div class="account">
-						<a href="@routes.DkpController.account(account.id)">
-							<span class="label" @if(account.color.isDefined) {
-								style="color: #@account.color.get" }>
-							@account.label
-							</span>
-							<div class="amount">
-							@account.available.html
-							</div>
-						</a>
+	<meta http-equiv="refresh" content="60" />
+	<div style="flex: 1;">
+		<article class="accounts">
+			<header>
+				<h3>PVP/Trial</h3>
+				Nombre: <span class="capsule" style="margin-left: 4px; margin-right: 8px;">@rosterCount / @count</span>
+				Total: <span class="capsule" style="margin-left: 4px;">@total</span>
+				@if(request.user.isOfficer) {
+					<a href="@routes.DkpController.manage()">
+					<i class="material-icons" style="margin-left: 8px;">settings_applications</i></a>
+				}
+			</header>
+			<main>
+				@for(group <- rosterAccounts) {
+					<div class="accounts-group">
+					@for(account <- group) {
+						<div class="account">
+							<a href="@routes.DkpController.account(account.id)">
+								<span class="label" @if(account.color.isDefined) {
+									style="color: #@account.color.get" }>
+								@account.label
+								</span>
+								<div class="amount">
+									<span class="minimum-bid">@account.minimumBid</span>
+									@account.available.html
+								</div>
+							</a>
+						</div>
+					}
 					</div>
 				}
-				</div>
-			}
-		</main>
-	</article>
+			</main>
+		</article>
+		<article class="accounts">
+			<header>
+				<h3>PVE/Casual</h3>
+				Nombre: <span class="capsule" style="margin-left: 4px;">@casualCount</span>
+			</header>
+			<main>
+				@for(group <- casualAccounts) {
+					<div class="accounts-group">
+					@for(account <- group) {
+						<div class="account">
+							<a href="@routes.DkpController.account(account.id)">
+								<span class="label" @if(account.color.isDefined) {
+									style="color: #@account.color.get" }>
+								@account.label
+								</span>
+								<div class="amount">
+									<span class="minimum-bid">@account.minimumBid</span>
+									@account.available.html
+								</div>
+							</a>
+						</div>
+					}
+					</div>
+				}
+			</main>
+		</article>
+	</div>
 
 	<div style="min-width: 300px;">
 		<article>
@@ -93,6 +120,10 @@
 					<a href="@routes.DkpController.createAccount()">
 						<i class="material-icons">account_balance_wallet</i>
 						Créer un compte
+					</a>
+					<a href="@routes.DkpController.batch()">
+						<i class="material-icons">cloud_upload</i>
+						Batch processing
 					</a>
 				</nav>
 			</article>

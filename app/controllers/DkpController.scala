@@ -15,29 +15,34 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc.{Action, AnyContent, Result}
 
+import scala.concurrent.Future
+
 class DkpController extends DashController {
   def index: Action[AnyContent] = DashAction.authenticated.async { implicit req =>
+    val accountWithAccesses = Accounts.join(AccountAccesses).on { case (a, aa) => a.id === aa.account }
+    val mainsAccounts       = accountWithAccesses.filter { case (a, aa) => !a.archived && aa.main }.map(_._1)
+    val decayableAccounts   = Accounts.filter(a => !a.archived && a.useDecay)
+    val userAccounts        = accountWithAccesses.filter { case (_, aa) => aa.owner === req.user.id }
+
     for {
-      accounts <- Accounts
-                   .filter(a => !a.archived && AccountAccesses.filter(aa => aa.account === a.id && aa.main).exists)
-                   .sortBy(a => (a.balance.desc, a.label))
-                   .result
-      count <- Accounts.filter(a => !a.archived && a.useDecay).size.result
-      total <- Accounts
-                .filter(a => !a.archived && a.useDecay)
-                .map(a => a.balance)
-                .sum
-                .getOrElse(DkpAmount(0))
-                .result
-      mines <- Accounts
-                .join(AccountAccesses)
-                .on { case (a, aa) => a.id === aa.account && aa.owner === req.user.id }
-                .sortBy { case (a, aa) => (aa.main.desc, a.balance.desc, a.label) }
-                .result
+      accounts     <- mainsAccounts.sortBy(a => (a.balance.desc, a.label)).result
+      count        <- decayableAccounts.size.result
+      total        <- decayableAccounts.map(a => a.balance).sum.getOrElse(DkpAmount(0)).result
+      mines        <- userAccounts.sortBy { case (a, aa) => (aa.main.desc, a.balance.desc, a.label) }.result
       transactions <- Transactions.sortBy(t => t.id.desc).take(10).result
     } yield {
-      val groupedAccounts = accounts.groupBy(a => a.color).values.toSeq.sortBy(as => as.head.color)
-      Ok(views.html.dkp.index(groupedAccounts, count, total, mines, transactions))
+      val (rosters, casuals) = accounts.sortBy(_.available).reverse.partition(a => a.roster)
+
+      def groupAccounts(accounts: Seq[Account]) =
+        (accounts.groupBy(a => a.color).values.toSeq.sortBy(as => as.head.color), accounts.size)
+
+      val (rostersGrouped, rostersCount) = groupAccounts(rosters)
+      val (casualsGrouped, casualsCount) = groupAccounts(casuals)
+
+      Ok(
+        views.html.dkp
+          .index(rostersGrouped, rostersCount, casualsGrouped, casualsCount, count, total, mines, transactions)
+      )
     }
   }
 
@@ -60,6 +65,11 @@ class DkpController extends DashController {
     } yield {
       Ok(views.html.dkp.manage(accounts))
     }
+  }
+
+  def manageRoster(id: Snowflake, state: Boolean) = DashAction.officers.async { implicit req =>
+    Accounts.filter(a => a.id === id).map(_.roster).update(state) andThen
+      DBIO.successful(Redirect(routes.DkpController.manage()))
   }
 
   def manageArchived(id: Snowflake, state: Boolean) = DashAction.officers.async { implicit req =>
@@ -244,6 +254,7 @@ class DkpController extends DashController {
             DkpAmount(0),
             archived = false,
             useDecay = true,
+            roster = true,
             overdraft = DkpAmount(0)
           )).map(_ => Redirect(routes.DkpController.account(id)))
         }
@@ -265,6 +276,15 @@ class DkpController extends DashController {
             .map(_ => Redirect(routes.DkpController.transaction(id)))
         }
       )
+  }
+
+  def batch = DashAction.officers { implicit req =>
+    Ok(views.html.dkp.batch())
+  }
+
+  def batchProcess(url: String) = DashAction.officers.async { implicit req =>
+    services.vision.annotate(url)
+    Future.successful(Ok(""))
   }
 }
 

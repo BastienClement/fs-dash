@@ -22,6 +22,8 @@ class Orders(tag: Tag) extends Table[Order](tag, "auctions_orders_view") {
   def validity  = column[Instant]("validity")
   def closed    = column[Option[Instant]]("closed")
 
+  def priceInt = column[Int]("price")
+
   override def * =
     (id, kind, owner, account, item, quantity, remaining, price, hold, posted, validity, closed) <>
       ((Order.apply _).tupled, Order.unapply)

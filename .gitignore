@@ -14,3 +14,4 @@ dist
 /RUNNING_PID
 /.settings
 /var
+/scripts/opt/fs-dash/gcp-credentials.json

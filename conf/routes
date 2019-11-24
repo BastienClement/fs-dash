@@ -43,6 +43,7 @@ GET         /calendar/:month                       controllers.CalendarControlle
 
 GET         /dkp                                   controllers.DkpController.index
 GET         /dkp/manage                            controllers.DkpController.manage
+GET         /dkp/manage/roster/:id                 controllers.DkpController.manageRoster(id: model.Snowflake, state: Boolean ?= false)
 GET         /dkp/manage/archived/:id               controllers.DkpController.manageArchived(id: model.Snowflake, state: Boolean ?= false)
 GET         /dkp/manage/use-decay/:id              controllers.DkpController.manageUseDecay(id: model.Snowflake, state: Boolean ?= false)
 GET         /dkp/manage/links/:id                  controllers.DkpController.manageLinks(id: model.Snowflake)
@@ -55,6 +56,8 @@ GET         /dkp/create-transaction                controllers.DkpController.cre
 POST        /dkp/create-transaction                controllers.DkpController.createTransactionPost
 GET         /dkp/transaction/:id                   controllers.DkpController.transaction(id: model.Snowflake)
 POST        /dkp/create-movement                   controllers.DkpController.createMovement(transaction: Option[model.Snowflake] ?= None, account: Option[model.Snowflake] ?= None)
+GET         /dkp/batch                             controllers.DkpController.batch
+GET         /dkp/batch-process                     controllers.DkpController.batchProcess(url: String)
 
 ### Static Assets ###
 

@@ -9,8 +9,11 @@ import scala.jdk.CollectionConverters._
 object MarkdownRenderer {
   private val extensions = List(TablesExtension.create()).asJava
 
-  private val parser: Parser             = Parser.builder().extensions(extensions).build()
-  private val htmlRenderer: HtmlRenderer = HtmlRenderer.builder().extensions(extensions).escapeHtml(true).build()
+  private val parser: Parser =
+    Parser.builder().extensions(extensions).build()
+
+  private val htmlRenderer: HtmlRenderer =
+    HtmlRenderer.builder().extensions(extensions).escapeHtml(false).build()
 
   def render(text: String): String = htmlRenderer.render(parser.parse(text))
 }

@@ -1,0 +1,11 @@
+@()(implicit request: DashRequest[_])
+
+@layout.main("dkp-batch") {
+	<article>
+
+	</article>
+	<script>
+		var processUrl = '@routes.DkpController.batchProcess("")';
+	</script>
+	<script src="@routes.Assets.versioned("javascripts/dash-dkp-batch.js")" defer></script>
+}

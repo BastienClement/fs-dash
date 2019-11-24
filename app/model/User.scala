@@ -12,7 +12,7 @@ case class User(
 ) {
   def isAdmin: Boolean       = roles.intersect(Set(User.RoleAdmin, User.RoleGuildMaster)).nonEmpty
   def isOfficer: Boolean     = isAdmin || roles.contains(User.RoleOfficer)
-  def isMember: Boolean      = isOfficer || roles.intersect(Set(User.RoleMember, User.RoleTrial)).nonEmpty
+  def isMember: Boolean      = isOfficer || roles.intersect(Set(User.RolePvP, User.RolePvE, User.RoleTrial)).nonEmpty
   def isFromScratch: Boolean = isMember || roles.intersect(User.roles).nonEmpty
 
   def color: String =
@@ -42,12 +42,13 @@ object User {
   val RoleAdmin       = Snowflake(608756668192260097L)
   val RoleGuildMaster = Snowflake(584304037365678091L)
   val RoleOfficer     = Snowflake(584304138855383041L)
-  val RoleMember      = Snowflake(584304255490457600L)
+  val RolePvP      = Snowflake(642351734840360990L)
+  val RolePvE = Snowflake(584304255490457600L)
   val RoleTrial       = Snowflake(607650376036122710L)
   val RoleCasual      = Snowflake(614613591672487946L)
 
   val roles: Set[Snowflake] =
-    Set(RoleAdmin, RoleGuildMaster, RoleOfficer, RoleMember, RoleTrial, RoleCasual)
+    Set(RoleAdmin, RoleGuildMaster, RoleOfficer, RolePvP, RolePvE, RoleTrial, RoleCasual)
 
   val ClassDruid   = Snowflake(584386195769917460L)
   val ClassHunter  = Snowflake(584386420341211146L)

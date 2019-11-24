@@ -6,6 +6,10 @@ body > main.charter {
 		top: 76px;
 		min-width: 200px;
 
+		@media screen and (max-width: $mobile-breakpoint) {
+			position: static;
+		}
+
 		main {
 			padding: 0;
 		}
@@ -99,6 +103,27 @@ body > main.charter {
 		article main {
 			a {
 				color: $color-fs;
+			}
+
+			h4 {
+				color: $color-fs;
+				font-weight: 600;
+				&:not(:first-child) {
+					margin-top: 16px;
+				}
+			}
+
+			& > .table-container {
+				margin-right: -8px;
+				margin-left: -8px;
+				padding-left: 61px;
+				margin-bottom: 16px;
+				width: auto;
+
+				table {
+					border-left: 1px solid #ffffff18;
+					border-bottom: 1px solid #ffffff18;
+				}
 			}
 
 			p {
