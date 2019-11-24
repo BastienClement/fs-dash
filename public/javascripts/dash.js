@@ -12,7 +12,7 @@ $.debounce = function (delay, func) {
 
 autosize(document.querySelectorAll("textarea"));
 
-$("select[multiple]").selectize();
+$("select[multiple], select.selectize").selectize();
 
 $("input[cleave=dkp]").toArray().forEach(function (field) {
 	new Cleave(field, {

@@ -153,6 +153,8 @@ class DkpController extends DashController {
       balance    <- balance
       movements  <- detailedMovementsData.result.map(ms => ms.map(DetailedMovement.tupled))
       holds      <- if (isFuture) Holds.filter(h => h.account === id).sortBy(_.id).result else DBIO.successful(Seq.empty)
+      hasAccess  <- AccountAccesses.filter(aa => aa.account === id && aa.owner === req.user.id).exists.result
+      accounts   <- accountsList
     } yield {
       optAccount.fold(NotFound(views.html.error("Erreur", Some("Ce compte n'existe pas."))))(account => {
         val previous = dateStart.atZone(timezone).minusMonths(1).toInstant.toEpochMilli
@@ -163,6 +165,8 @@ class DkpController extends DashController {
             movements,
             balance.getOrElse(DkpAmount(0)),
             holds,
+            hasAccess,
+            ("", "") +: accounts,
             previous,
             next,
             DateTimeFormatter.ofPattern("MMM YYYY").withZone(timezone).format(dateStart),
@@ -223,17 +227,21 @@ class DkpController extends DashController {
                     .on { case (m, a) => m.account === a.id }
                     .sortBy { case (m, _) => m.id }
                     .result
-      accounts <- Accounts
-                   .filter(a => !a.archived)
-                   .map(a => a.id -> a.label)
-                   .result
-                   .map(_.map { case (id, label) => id.toString -> label })
+      accounts <- accountsList
     } yield {
       optTransaction.fold(NotFound(views.html.error("Erreur", Some("Cette transaction n'existe pas.")))) {
         transaction =>
           Ok(views.html.dkp.transaction(transaction, movements, form, accounts))
       }
     }
+  }
+
+  private def accountsList: DBIOAction[Seq[(String, String)], NoStream, R] = {
+    Accounts
+      .filter(a => !a.archived)
+      .map(a => a.id -> a.label)
+      .result
+      .map(_.map { case (id, label) => id.toString -> label })
   }
 
   def createAccount: Action[AnyContent] = DashAction.officers { implicit req =>

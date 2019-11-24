@@ -1,5 +1,5 @@
-@import model.dkp.{Account, DkpAmount, Hold}
-@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, holds: Seq[Hold], previous: Long, next: Long, month:String, addMovementForm: Form[DkpController.AddMovement])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
+@@@import model.dkp.{Account, DkpAmount, Hold}
+@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, holds: Seq[Hold], hasAccess: Boolean, accounts: Seq[(String, String)], previous: Long, next: Long, month:String, addMovementForm: Form[DkpController.AddMovement])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
 
 @layout.main("dkp-account") {
     <article class="account-details">
@@ -139,6 +139,22 @@
             </table>
         </div>
     </article>
+		@if(hasAccess) {
+			<article class="add-movement">
+				<header>
+					<h3>Envoyer des DKPs</h3>
+				</header>
+				@helper.form(action = routes.DkpController.createMovement(None, Some(account.id))) {
+					@helper.CSRF.formField
+					@helper.select(addMovementForm("accounts"), accounts, Symbol("class") -> "selectize")
+					@helper.textarea(addMovementForm("details"))
+					@helper.inputText(addMovementForm("amount"), Symbol("cleave") -> "dkp")
+					<div class="actions">
+						<button type="submit">Envoyer</button>
+					</div>
+				}
+			</article>
+		}
 		@if(request.user.isOfficer) {
 			<article class="add-movement">
 				<header>
