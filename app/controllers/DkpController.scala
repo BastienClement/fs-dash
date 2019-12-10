@@ -15,8 +15,6 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc.{Action, AnyContent, Result}
 
-import scala.concurrent.Future
-
 class DkpController extends DashController {
   def index: Action[AnyContent] = DashAction.authenticated.async { implicit req =>
     val accountWithAccesses = Accounts.join(AccountAccesses).on { case (a, aa) => a.id === aa.account }
@@ -154,13 +152,14 @@ class DkpController extends DashController {
         .sortBy { case (m, _, _) => m.id }
 
     for {
-      optAccount <- Accounts.filter(a => a.id === id).result.headOption
-      balance    <- balance
-      movements  <- detailedMovementsData.result.map(ms => ms.map(DetailedMovement.tupled))
-      holds      <- if (isFuture) Holds.filter(h => h.account === id).sortBy(_.id).result else DBIO.successful(Seq.empty)
-      hasAccess  <- AccountAccesses.filter(aa => aa.account === id && aa.owner === req.user.id).exists.result
-      accounts   <- accountsList(a => a.id =!= id)
-      tradeTax   <- DecayConfig.tradeTax
+      optAccount   <- Accounts.filter(a => a.id === id).result.headOption
+      balance      <- balance
+      movements    <- detailedMovementsData.result.map(ms => ms.map(DetailedMovement.tupled))
+      holds        <- if (isFuture) Holds.filter(h => h.account === id).sortBy(_.id).result else DBIO.successful(Seq.empty)
+      hasAccess    <- AccountAccesses.filter(aa => aa.account === id && aa.owner === req.user.id).exists.result
+      accounts     <- accountsList(a => a.id =!= id)
+      tradeTax     <- DecayConfig.tradeTax
+      tradeEnabled <- DecayConfig.tradeEnabled
     } yield {
       optAccount.fold(NotFound(views.html.error("Erreur", Some("Ce compte n'existe pas."))))(account => {
         val previous = dateStart.atZone(timezone).minusMonths(1).toInstant.toEpochMilli
@@ -174,6 +173,7 @@ class DkpController extends DashController {
             hasAccess,
             ("", "") +: accounts,
             tradeTax,
+            tradeEnabled,
             previous,
             next,
             DateTimeFormatter.ofPattern("MMM YYYY").withZone(timezone).format(dateStart),
@@ -225,19 +225,22 @@ class DkpController extends DashController {
     }
 
   def sendAmount(id: Snowflake) = DashAction.authenticated.async { implicit req =>
-    AccountAccesses
+    (AccountAccesses
       .filter(aa => aa.account === id && aa.owner === req.user.id)
       .exists
-      .result
+      .result zip DecayConfig.tradeEnabled)
       .flatMap {
-        case true =>
+        case (true, true) =>
           DkpController.sendAmountForm
             .bindFromRequest()
             .fold(
               errors => accountPage(id, None, DkpController.addMovementForm, errors),
               data => {
                 assert(data.amount.value > 0)
-                (Accounts.filter(a => a.id === id).result.head zip Accounts.filter(a => a.id === data.account).result.head zip DecayConfig.tradeTax).flatMap {
+                (Accounts
+                  .filter(a => a.id === id)
+                  .result
+                  .head zip Accounts.filter(a => a.id === data.account).result.head zip DecayConfig.tradeTax).flatMap {
                   case ((account, recipient), tradeTax) =>
                     account.available >= data.amount match {
                       case true =>
@@ -274,7 +277,7 @@ class DkpController extends DashController {
               }
             )
 
-        case false =>
+        case _ =>
           DBIO.successful(
             Ok(views.html.error("Non autorisé", Some("Vous ne pouvez pas envoyer de DKP depuis ce compte.")))
           )
@@ -355,15 +358,6 @@ class DkpController extends DashController {
             .map(_ => Redirect(routes.DkpController.transaction(id)))
         }
       )
-  }
-
-  def batch = DashAction.officers { implicit req =>
-    Ok(views.html.dkp.batch())
-  }
-
-  def batchProcess(url: String) = DashAction.officers.async { implicit req =>
-    services.vision.annotate(url)
-    Future.successful(Ok(""))
   }
 }
 

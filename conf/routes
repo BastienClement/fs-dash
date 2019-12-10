@@ -57,8 +57,9 @@ GET         /dkp/create-transaction                controllers.DkpController.cre
 POST        /dkp/create-transaction                controllers.DkpController.createTransactionPost
 GET         /dkp/transaction/:id                   controllers.DkpController.transaction(id: model.Snowflake)
 POST        /dkp/create-movement                   controllers.DkpController.createMovement(transaction: Option[model.Snowflake] ?= None, account: Option[model.Snowflake] ?= None)
-GET         /dkp/batch                             controllers.DkpController.batch
-GET         /dkp/batch-process                     controllers.DkpController.batchProcess(url: String)
+
+GET         /dkp/batch                             controllers.DkpBatchController.batch
+GET         /dkp/batch-process                     controllers.DkpBatchController.batchProcess(url: String)
 
 ### Static Assets ###
 

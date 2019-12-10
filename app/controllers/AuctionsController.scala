@@ -44,13 +44,15 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
                 else DBIO.successful(0)
       gold <- WowItems.filter(i => i.id === 0).result.head
     } yield {
-      Ok(views.html.auctions.index(
-        if (orders.exists { case (_, i) => i.id == 0 }) orders
-        else ((OrderOverview(0, 0, None, 0, None), gold)) +: orders,
-        mines,
-        matches,
-        pending
-      ))
+      Ok(
+        views.html.auctions.index(
+          if (orders.exists { case (_, i) => i.id == 0 }) orders
+          else ((OrderOverview(0, 0, None, 0, None), gold)) +: orders,
+          mines,
+          matches,
+          pending
+        )
+      )
     }
   }
 
@@ -141,12 +143,11 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
           .head
           .map(a => kind == "ask" || (a.withdrawLimit >= (price * quantity)))
 
-    val conflictingOffers =
-      Orders
-        .filter(o => o.item === id && o.kind === kind && o.closed.isEmpty)
-        .filter(o => !(o.priceInt === price.value) && ((o.priceInt - price.value).abs < (o.priceInt * 5 / 100)))
-        .exists
-        .result
+    val otherOrders = Orders.filter(o => o.item === id && o.kind === kind && o.closed.isEmpty)
+    val conflict    = otherOrders.filter(o => (o.priceInt - price.value).abs < (o.priceInt * 5 / 100)).exists
+    val exactMatch  = otherOrders.filter(o => o.priceInt === price.value).exists
+
+    val conflictingOffers = (!exactMatch && conflict).result
 
     val validity =
       if (delay > 0)
