@@ -39,7 +39,9 @@ class TradesController extends DashController with TradesRequestImpl {
                  .map { case ((o, s), i) => (o, s, i) }
                  .sortBy { case (o, _, _) => (o.closed.asc, o.id.desc) }
                  .result
-    } yield Ok(views.html.trades.index(limit, sessions, orders, req.config))
+      pending <- if (req.user.isOfficer) Orders.filter(o => o.closed && o.ack.isEmpty).size.result
+                else DBIO.successful(0)
+    } yield Ok(views.html.trades.index(limit, sessions, orders, pending, req.config))
   }
 
   def item(id: Int) = TradesAction.async { implicit req =>
@@ -88,17 +90,50 @@ class TradesController extends DashController with TradesRequestImpl {
     } yield Redirect(routes.TradesController.item(item))
   }
 
+  def validation = DashAction.officers.async { implicit req =>
+    for {
+      pending <- Orders
+                  .filter(o => o.closed && o.ack.isEmpty)
+                  .join(Users)
+                  .on { case (o, u) => o.owner === u.id }
+                  .join(Sessions)
+                  .on { case ((o, _), s) => o.session === s.id }
+                  .join(WowItems)
+                  .on { case ((_, s), i) => s.sku === i.id }
+                  .map { case (((o, u), _), i) => (u, o, i) }
+                  .result
+      groupedPending = pending
+        .groupBy { case (u, _, _) => u }
+        .toSeq
+        .map {
+          case (k, list) => (k, list.map { case (_, o, i) => (o, i) }.sortBy { case (o, i) => (o.kind, i.name) })
+        }
+        .sortBy { case (u, _) => u.username }
+    } yield {
+      Ok(views.html.trades.validation(groupedPending))
+    }
+  }
+
+  def validate(order: Snowflake, status: Boolean) = DashAction.officers.async { implicit req =>
+    Orders
+      .filter(o => o.id === order && o.ack.isEmpty)
+      .map(o => (o.ack, o.ackBy))
+      .update((Some(status), Some(req.user.id)))
+      .map(_ => NoContent)
+  }
+
   def catalog = DashAction.officers.async { implicit req =>
-    Skus
-      .map(sku => (sku, sku.status))
-      .join(WowItems)
-      .on { case ((sku, _), i) => sku.item === i.id }
-      .map { case ((s, ss), i) => (s, ss, i) }
-      .sortBy { case (s, _, i) => ((s.buying || s.selling).desc, i.name.asc) }
-      .result
-      .map { skus =>
-        Ok(views.html.trades.catalog(skus))
-      }
+    for {
+      skus <- Skus
+               .map(sku => (sku, sku.status))
+               .join(WowItems)
+               .on { case ((sku, _), i) => sku.item === i.id }
+               .map { case ((s, ss), i) => (s, ss, i) }
+               .sortBy { case (s, _, i) => ((s.buying || s.selling).desc, i.name.asc) }
+               .result
+    } yield {
+      Ok(views.html.trades.catalog(skus))
+    }
   }
 
   def add = DashAction.officers.async { implicit req =>

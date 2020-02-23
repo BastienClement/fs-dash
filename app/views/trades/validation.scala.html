@@ -1,0 +1,50 @@
+@(pending: Seq[(User, Seq[(model.trades.Order, WowItem)])])(implicit request: DashRequest[_])
+
+@layout.main("trades") {
+	<article style="flex: 1; max-width: 1000px;">
+		<header>
+			<h3>Trades en attente</h3>
+		</header>
+		<table>
+			<tbody>
+				@for((user, orders) <- pending) {
+					<tr class="no-hover">
+						<th style="color: @user.color">@user.username</th>
+						<td>
+							<table style="border: 1px solid #ffffff18; border-top: 0;">
+								<tbody>
+								@for((order, item) <- orders) {
+									<tr data-order="@order.id">
+										<td style="width: 100px">@order.guildStatusText</td>
+										<td class="fit"><span class="wh-small-border scaled"><img src="@item.smallIconUrl"></span></td>
+										<td><span class="q@item.quality">@item.link</span> &cross; @order.closeQuantity.getOrElse("?")</td>
+										<td class="fit" style="padding: 0 8px;">
+											<div style="display: flex;">
+												<button data-action="validate" class="class-3" style="padding: 8px; margin-right: 16px">
+													<i class="material-icons" style="font-size: 15px">done</i>
+												</button>
+												<button data-action="cancel" style="color: red; padding: 8px">
+													<i class="material-icons" style="font-size: 15px">clear</i>
+												</button>
+											</div>
+										</td>
+									</tr>
+								}
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				}
+				@if(pending.isEmpty) {
+					<tr class="no-hover">
+						<td style="padding: 20px; color: #999; font-weight: 400; background: none !important">
+							Aucune transaction à valider...
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</article>
+
+	<script src="@routes.Assets.versioned("javascripts/dash-trades.js")" defer></script>
+}

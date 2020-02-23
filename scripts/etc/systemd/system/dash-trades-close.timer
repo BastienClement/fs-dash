@@ -1,0 +1,9 @@
+[Unit]
+Description=Run dash-trades-close.service
+
+[Timer]
+OnCalendar=Sun *-*-* 16:00:00 Europe/Paris
+OnCalendar=Wed *-*-* 16:00:00 Europe/Paris
+
+[Install]
+WantedBy=timers.target

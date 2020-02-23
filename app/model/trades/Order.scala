@@ -24,6 +24,10 @@ case class Order(
     case ("bid", true, _)    => Html("<span class='class-3'>Acheté</span>")
   }
 
+  def guildStatusText: Html =
+    if (kind == "ask") Html("<span class='class-11'>Recevoir</span>")
+    else Html("<span class='class-3'>Envoyer</span>")
+
   def detailsText: Html = (kind, closed, ack) match {
     case ("ask", true, None) => Html("<span class='class-11'>À envoyer à un officier ou \"Fstrade\".</span>")
     case ("bid", true, None) => Html("<span class='class-11'>En attente d'envoi par la banque de guilde.</span>")

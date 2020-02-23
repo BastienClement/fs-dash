@@ -78,3 +78,25 @@ $("form[data-kind]").each(function (_, form) {
 
 	$quantity.on("keyup", update);
 });
+
+$("[data-order] button[data-action]").on("click", function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+
+	var $this = $(this)
+	var $row = $this.closest("tr");
+
+	var action = $this.data("action");
+	var order = $row.data("order");
+
+	$this.blur();
+	$row.css({
+		"text-decoration": "line-through",
+	});
+	$("button", $row).attr("disabled", true);
+
+	$.ajax({
+		method: "GET",
+		url: "/trades/validation/" + order + "/" + action,
+	});
+});

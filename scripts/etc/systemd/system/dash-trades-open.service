@@ -1,5 +1,5 @@
 [Unit]
-Description=Runs DKP auction match procedure
+Description=Opens a new trade sesion
 Requires=docker.service
 After=docker.service
 
@@ -8,4 +8,4 @@ Type=oneshot
 ExecStart=/usr/bin/docker run --rm \
     --env-file /opt/fs-dash/env \
     postgres:alpine \
-    psql -c CALL\x20auctions_perform_matching()
+    psql -c CALL\x20trades_next_session()

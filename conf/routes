@@ -26,6 +26,9 @@ GET         /trades/catalog/fetch-item                 controllers.TradesControl
 GET         /trades/catalog/sku/:id                    controllers.TradesController.sku(id: Int)
 POST        /trades/catalog/sku/:id/configure          controllers.TradesController.configureSku(id: Int)
 POST        /trades/catalog/sku/:id/adjust             controllers.TradesController.adjustSku(id: Int)
+GET         /trades/validation                         controllers.TradesController.validation()
+GET         /trades/validation/:order/validate         controllers.TradesController.validate(order: model.Snowflake, status: Boolean = true)
+GET         /trades/validation/:order/cancel           controllers.TradesController.validate(order: model.Snowflake, status: Boolean = false)
 
 ### DPK ###
 

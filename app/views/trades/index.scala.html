@@ -1,4 +1,4 @@
-@(limit: model.trades.Limit, sessions: Seq[(model.trades.Session, WowItem, model.trades.Sku, model.trades.SkuStatus)], orders: Seq[(model.trades.Order, model.trades.Session, WowItem)], config: model.trades.Config)(implicit request: DashRequest[_])
+@(limit: model.trades.Limit, sessions: Seq[(model.trades.Session, WowItem, model.trades.Sku, model.trades.SkuStatus)], orders: Seq[(model.trades.Order, model.trades.Session, WowItem)], pending: Int, config: model.trades.Config)(implicit request: DashRequest[_])
 
 @layout.main("trades") {
 	<article style="flex: 1; max-width: 1000px">
@@ -18,7 +18,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
+					<tr class="no-hover">
 						<td colspan="2" class="right border-right" style="font-weight: 400">Limites disponibles</td>
 						<td colspan="4" class="center border-left border-right" style="font-weight: 400">@limit.askRemaining.html <span style="color: #999">/ @limit.askLimit.html</span></td>
 						<td colspan="3" class="center border-left" style="font-weight: 400">@limit.bidRemaining.html <span style="color: #999">/ @limit.bidLimit.html</span></td>
@@ -74,6 +74,12 @@
 	<article style="flex: 0.8;">
 		<header>
 			<h3>Mes opérations</h3>
+			@if(request.user.isOfficer) {
+				<div class="capsule" style="margin-right: 8px;">@pending</div>
+				<a href="@routes.TradesController.validation()">
+					<i class="material-icons">done_all</i>
+				</a>
+			}
 		</header>
 		<div class="table-container">
 			<table class="tabular">
