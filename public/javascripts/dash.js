@@ -52,6 +52,25 @@ $("input[cleave=count]").toArray().forEach(function (field) {
 	new Cleave(field, {
 		numeral: true,
 		numeralDecimalScale: 0,
+		numeralIntegerScale: 4,
+		numeralPositiveOnly: true,
+		numeralThousandsGroupStyle: "none"
+	})
+});
+
+$("input[cleave=count-negative]").toArray().forEach(function (field) {
+	new Cleave(field, {
+		numeral: true,
+		numeralDecimalScale: 0,
+		numeralIntegerScale: 4,
+		numeralThousandsGroupStyle: "none"
+	})
+});
+
+$("input[cleave=percent-100-200]").toArray().forEach(function (field) {
+	new Cleave(field, {
+		numeral: true,
+		numeralDecimalScale: 0,
 		numeralIntegerScale: 3,
 		numeralPositiveOnly: true,
 		numeralThousandsGroupStyle: "none"
@@ -64,4 +83,12 @@ $("tbody.with-details .details-toggle").parent("tr").click(function () {
 
 $("tbody.with-details a").click(function (e) {
 	e.stopPropagation();
+});
+
+$(function() {
+	$("body").on("click", "[data-link]", function(e) {
+		location.href = this.dataset.link;
+		e.preventDefault();
+		e.stopPropagation();
+	});
 });

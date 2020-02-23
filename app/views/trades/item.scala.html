@@ -1,0 +1,71 @@
+@(item: WowItem, session: model.trades.Session, asks: Seq[(model.trades.Order, User)], bids: Seq[(model.trades.Order, User)], limit: model.trades.Limit, balance: model.dkp.DkpAmount)(implicit request: DashRequest[_])
+
+@layout.main("trades") {
+	<article style="flex: 1;
+		max-width: 1000px">
+		<header>
+			<h3>
+				<span class="wh-medium-border" style="margin-right: 8px;"><img src="@item.mediumIconUrl"/></span>
+				@if(item.id > 0) {
+					<a href="https://classic.wowhead.com/item=@item.id" data-wowhead="" class="q@item.quality">@item.name</a>
+				} else {
+					@item.name
+				}
+			</h3>
+			<a href=""><i class="material-icons">refresh</i></a>
+		</header>
+		<div class="table-container">
+			<table style="table-layout: fixed;">
+				<tr class="no-hover">
+					<td style="width: 50%;
+						padding: 0;
+						vertical-align: top" class="border-right">
+					@views.html.trades.itemOrders(
+						"Vendeurs",
+						item,
+						"ask",
+						asks,
+						session.buyOrders,
+						session.buyQuantity,
+						session.buyPrice
+					)
+					</td>
+					<td style="width: 50%;
+						padding: 0;
+						vertical-align: top" class="border-left">
+					@views.html.trades.itemOrders(
+						"Acheteurs",
+						item,
+						"bid",
+						bids,
+						session.sellOrders,
+						session.sellQuantity,
+						session.sellPrice
+					)
+					</td>
+				</tr>
+				<tfoot>
+					@if(session.buyQuantity > 0) {
+						@views.html.trades.itemForm(item, "ask", "", "border-right", session.buyPrice, asks.exists { case (_, u) => u.id == request.user.id })
+					} else {
+						<td style="width: 50%" class="border-right"></td>
+					}
+					@if(session.sellQuantity > 0) {
+						@views.html.trades.itemForm(item, "bid", "border-left", "", session.sellPrice, bids.exists { case (_, u) => u.id == request.user.id })
+					} else {
+						<td style="width: 50%" class="border-left"></td>
+					}
+				</tfoot>
+			</table>
+		</div>
+	</article>
+
+	<script>
+					var trades_ask_limit = @limit.askRemaining.value;
+					var trades_ask_price = @session.buyPrice.value;
+					var trades_bid_limit = @limit.bidRemaining.value;
+					var trades_bid_price = @session.sellPrice.value;
+					var trades_account_balance = @balance.value;
+	</script>
+	<script src="@routes.Assets.versioned("javascripts/dash-trades.js")" defer></script>
+}

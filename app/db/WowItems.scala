@@ -20,4 +20,6 @@ class WowItems(tag: Tag) extends Table[WowItem](tag, "wow_items") {
       ((WowItem.apply _).tupled, WowItem.unapply)
 }
 
-object WowItems extends TableQuery(new WowItems((_)))
+object WowItems extends TableQuery(new WowItems(_)) {
+  val findById = this.findBy(_.id)
+}

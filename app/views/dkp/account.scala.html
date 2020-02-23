@@ -1,5 +1,5 @@
 @import model.dkp.{Account, DkpAmount, Hold}
-@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, holds: Seq[Hold], hasAccess: Boolean, accounts: Seq[(String, String)], tradeTax: Double, tradeEnabled: Boolean, previous: Long, next: Long, month:String, addMovementForm: Form[DkpController.AddMovement], sendAmountForm: Form[DkpController.SendAmount])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
+@(account: Account, movements: Seq[DkpController.DetailedMovement], balance: DkpAmount, holds: Seq[Hold], previous: Long, next: Long, month:String, addMovementForm: Form[DkpController.AddMovement])(implicit request: DashRequest[_], messagesProvider: MessagesProvider)
 
 @layout.main("dkp-account") {
     <article class="account-details">
@@ -139,43 +139,6 @@
             </table>
         </div>
     </article>
-		@if(hasAccess) {
-			<article class="send-amount">
-				<header>
-					<h3>Envoyer des DKPs</h3>
-				</header>
-				@helper.form(action = routes.DkpController.sendAmount(account.id)) {
-					@helper.CSRF.formField
-					@helper.select(sendAmountForm("Destinataire"), accounts, Symbol("class") -> "selectize")
-					@helper.textarea(sendAmountForm("Détails"))
-					@helper.inputText(sendAmountForm("Montant"), Symbol("cleave") -> "dkp-positive")
-					<article class="warning" style="margin: 0 16px 24px 16px;
-						padding: 8px;
-						font-size: 12px;
-						display: none;
-						white-space: pre-wrap"></article>
-					<article class="error" style="margin: 0 16px 24px 16px;
-						padding: 8px;
-						font-size: 12px;
-						display: none;
-						white-space: pre-line"></article>
-					@if(tradeEnabled) {
-						<div class="actions">
-							<button type="submit" disabled>Envoyer</button>
-						</div>
-						<script>
-										var tradeTax = @tradeTax;
-										var tradeAvailable = @{(balance - holds.map(_.amount).sum).value};
-						</script>
-						<script src="@routes.Assets.versioned("javascripts/dash-dkp-account.js")" defer></script>
-					} else {
-						<article class="warning" style="display: block; margin: 16px; padding: 8px; width: 300px;">
-							L'envoi de DKP est n'est pas disponible actuellement.
-						</article>
-					}
-				}
-			</article>
-		}
 		@if(request.user.isOfficer) {
 			<article class="add-movement">
 				<header>

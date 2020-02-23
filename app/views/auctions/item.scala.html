@@ -1,4 +1,4 @@
-@(item: WowItem, accounts: Seq[model.dkp.Account], orders: Seq[AuctionsController.ItemOrder], tradeTax: Double)(implicit request: DashRequest[_])
+@(item: WowItem, accounts: Seq[model.dkp.Account], orders: Seq[AuctionsController.ItemOrder], limits: model.auctions.RollingLimit, tradeTax: Double)(implicit request: DashRequest[_])
 
 @layout.main("auctions") {
 	<article class="item-orders">
@@ -127,6 +127,10 @@
 		</form>
 	</article>
 	<script>
+		var askAvailable = @limits.askAvailable.value;
+		var askBurstable = @limits.askBurstable;
+		var bidAvailable = @limits.bidAvailable.value;
+		var bidBurstable = @limits.bidBurstable;
 		var tradeTax = @tradeTax;
 		var bids = [@orders.filter(o => o.order.kind == "bid").map(_.order.price.value / 100.0).distinct.mkString(", ")];
 		var asks = [@orders.filter(o => o.order.kind == "ask").map(_.order.price.value / 100.0).distinct.mkString(", ")];

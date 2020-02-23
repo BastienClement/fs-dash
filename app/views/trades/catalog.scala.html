@@ -1,0 +1,55 @@
+@(skus: Seq[(model.trades.Sku, model.trades.SkuStatus, WowItem)])(implicit request: DashRequest[_])
+
+@layout.main("trades") {
+	<article style="flex: 1; max-width: 1000px;">
+		<header>
+			<h3>SKUs</h3>
+			<a href="@routes.TradesController.add()"><i class="material-icons">add</i></a>
+		</header>
+		<div class="table-container">
+			<table class="tabular">
+				<thead>
+					<tr>
+						<th colspan="2" class="border-right">Item</th>
+						<th class="center border-left">Buying</th>
+						<th class="center border-right">Selling</th>
+						<th colspan="3" class="center border-left border-right">Supply</th>
+						<th class="border-left right">Gold Price</th>
+					</tr>
+				</thead>
+				<tbody>
+				@for((sku, status, item) <- skus) {
+					<tr style="cursor: pointer" data-link="@routes.TradesController.sku(item.id)">
+						<td class="fit"><span class="wh-small-border"><img src="@item.smallIconUrl"/></span></td>
+						<td class="border-right">@item.name</td>
+						<td class="center border-left">
+						@if(sku.buying) {
+							<i class="material-icons" style="font-size: 15px;
+								color: #f5c635;">check_circle_outline</i>
+						}
+						</td>
+						<td class="center border-right">
+						@if(sku.selling) {
+							<i class="material-icons" style="font-size: 15px;
+								color: #f5c635;">check_circle_outline</i>
+						}
+						</td>
+						<td style="width: 15%" class="right border-left">
+							@status.currentSupply
+						</td>
+						<td class="fit">
+							<span style="opacity: 0.5">/</span>
+						</td>
+						<td style="width: 15%" class="border-right">
+							@sku.targetSupply
+						</td>
+						<td class="border-left right">
+							@status.formattedGoldPrice
+						</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		</div>
+	</article>
+}

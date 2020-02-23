@@ -131,7 +131,7 @@ object DkpBatchController {
         "id"       -> user.id,
         "username" -> user.username,
         "color"    -> user.color,
-        "isPvP"    -> user.isPvP
+        "isPvP"    -> user.isMember
       ),
       "account" -> Json.obj(
         "id"    -> mainAccount.id,

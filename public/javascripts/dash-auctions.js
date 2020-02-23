@@ -94,6 +94,9 @@ $(function () {
 			? accountSelect.selectedOptions[0].dataset.withdrawLimit
 			: $("input[name=account]")[0].dataset.withdrawLimit));
 
+		var rollingAvailable = orderKind === "bid" ? bidAvailable : askAvailable;
+		var burstAvailable = orderKind === "bid" ? bidBurstable : askBurstable;
+
 		var quantity = parseInt($("input[name=quantity]").val().replace(/[^0-9\.]/g, ""));
 		var price = toFixed(parseFloat($("input[name=price]")
 			.attr("placeholder",
@@ -111,6 +114,8 @@ $(function () {
 		if (isValid) {
 			if (orderKind === "bid" && !guildOrder && (quantity * price > withdrawLimit)) {
 				errorText = "Le montant total est supérieur au solde de DKP disponibles.";
+			} else if(!guildOrder && quantity * price > rollingAvailable && (!burstAvailable || quantity > 1)) {
+				errorText = "Le montant total est supérieur à la limite autorisée (" + formatAmount(rollingAvailable) + ")";
 			} else {
 				var others = (orderKind === "bid" ? bids : asks) || [];
 				if (others.indexOf(price) < 0) {

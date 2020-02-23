@@ -1,4 +1,4 @@
-@(orders: Seq[(model.auctions.OrderOverview, WowItem)], mines: Seq[(model.auctions.Order, model.WowItem)], matches: Seq[(model.auctions.Match, Option[Snowflake], Option[Snowflake], WowItem)], pending: Int)(implicit request: DashRequest[_])
+@(orders: Seq[(model.auctions.OrderOverview, WowItem)], mines: Seq[(model.auctions.Order, model.WowItem)], matches: Seq[(model.auctions.Match, Option[Snowflake], Option[Snowflake], WowItem)], limits: model.auctions.RollingLimit, askLimit: model.dkp.DkpAmount, bidLimit: model.dkp.DkpAmount, pending: Int)(implicit request: DashRequest[_])
 
 @layout.main("auctions") {
 	<article class="open-orders">
@@ -45,6 +45,23 @@
 						</tr>
 					}
 				</tbody>
+				<tfoot>
+					<tr>
+						<th colspan="2" style="padding: 8px;" class="border-right right">Limites disponibles</th>
+						<td colspan="3" class="center border-left border-right">
+							<span title="@limits.askTotal / @askLimit">@limits.askAvailable.html</span>
+							@if(limits.askBurstable) {
+								<i class="material-icons" style="font-size: 14px; margin-left: 8px; color: #f5c635;" title="Burst disponible">check_circle_outline</i>
+							}
+						</td>
+						<td colspan="3" class="center border-left">
+							<span title="@limits.bidTotal / @bidLimit">@limits.bidAvailable.html</span>
+							@if(limits.bidBurstable) {
+								<i class="material-icons" style="font-size: 14px; margin-left: 8px; color: #f5c635;" title="Burst disponible">check_circle_outline</i>
+							}
+						</td>
+					</tr>
+				</tfoot>
 			</table>
 		</div>
 	</article>
@@ -57,7 +74,6 @@
 				</span>
 				<a href="@routes.AuctionsController.pending()"><i class="material-icons">done_all</i></a>
 			}
-			<!--<a href="@routes.AuctionsController.history()"><i class="material-icons">history</i></a>-->
 		</header>
 		<div class="table-container">
 			<table class="tabular">

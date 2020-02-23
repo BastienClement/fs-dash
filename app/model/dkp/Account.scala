@@ -14,7 +14,7 @@ case class Account(
     holds: DkpAmount = DkpAmount(0)
 ) {
   def available: DkpAmount     = balance - holds
-  def minimumBid: Int          = (balance.value * 0.001).ceil.toInt.max(30)
+  def minimumBid: Int          = (balance.value * 0.001).ceil.toInt.max(60)
   def withdrawLimit: DkpAmount = available + overdraft
 }
 

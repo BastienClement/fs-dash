@@ -1,66 +1,77 @@
-GET         /                                      controllers.HomeController.index
-GET         /snowflake                             controllers.HomeController.snowflake
+GET         /                                          controllers.HomeController.index
+GET         /snowflake                                 controllers.HomeController.snowflake
 
 ### Auth  ###
 
-GET         /auth/authorize                        controllers.LoginController.authorize
-GET         /auth/logout                           controllers.LoginController.logout
+GET         /auth/authorize                            controllers.LoginController.authorize
+GET         /auth/logout                               controllers.LoginController.logout
 
 
 ### Charter ###
 
-GET         /charter                               controllers.CharterController.index
-GET         /charter/edit                          controllers.CharterController.edit(id: Option[model.Snowflake] ?= None)
-POST        /charter/edit                          controllers.CharterController.editPost(id: Option[model.Snowflake] ?= None)
-GET         /charter/move-up                       controllers.CharterController.moveUp(id: model.Snowflake)
-GET         /charter/move-down                     controllers.CharterController.moveDown(id: model.Snowflake)
+GET         /charter                                   controllers.CharterController.index
+GET         /charter/edit                              controllers.CharterController.edit(id: Option[model.Snowflake] ?= None)
+POST        /charter/edit                              controllers.CharterController.editPost(id: Option[model.Snowflake] ?= None)
+GET         /charter/move-up                           controllers.CharterController.moveUp(id: model.Snowflake)
+GET         /charter/move-down                         controllers.CharterController.moveDown(id: model.Snowflake)
 
 ### Auctions ###
 
-GET         /auctions                              controllers.AuctionsController.index
-GET         /auctions/create                       controllers.AuctionsController.create
-GET         /auctions/create/fetch-item            controllers.AuctionsController.fetchItem(id: Int)
-GET         /auctions/item/:id                     controllers.AuctionsController.item(id: Int)
-POST        /auctions/item/:id                     controllers.AuctionsController.itemPost(id: Int)
-POST        /auctions/item/:id/close/:order        controllers.AuctionsController.closeOrder(id: Int, order: model.Snowflake)
-GET         /auctions/pending                      controllers.AuctionsController.pending()
-POST        /auctions/pending/ack                  controllers.AuctionsController.ackMatching(id: model.Snowflake, status: Boolean)
-GET         /auctions/history                      controllers.AuctionsController.history()
+GET         /auctions                                  controllers.AuctionsController.index
+GET         /auctions/create                           controllers.AuctionsController.create
+GET         /auctions/create/fetch-item                controllers.AuctionsController.fetchItem(id: Int)
+GET         /auctions/item/:id                         controllers.AuctionsController.item(id: Int)
+POST        /auctions/item/:id                         controllers.AuctionsController.itemPost(id: Int)
+POST        /auctions/item/:id/close/:order            controllers.AuctionsController.closeOrder(id: Int, order: model.Snowflake)
+GET         /auctions/pending                          controllers.AuctionsController.pending()
+POST        /auctions/pending/ack                      controllers.AuctionsController.ackMatching(id: model.Snowflake, status: Boolean)
+
+### Trades ###
+
+GET         /trades                                    controllers.TradesController.index
+GET         /trades/item/:id                           controllers.TradesController.item(id: Int)
+POST        /trades/item/:id/order                     controllers.TradesController.createOrder(id: Int)
+GET         /trades/item/:id/order/:kind/delete        controllers.TradesController.deleteOrder(id: Int, kind: String)
+GET         /trades/catalog                            controllers.TradesController.catalog
+GET         /trades/catalog/add                        controllers.TradesController.add
+GET         /trades/catalog/fetch-item                 controllers.TradesController.fetchItem(id: Int)
+GET         /trades/catalog/sku/:id                    controllers.TradesController.sku(id: Int)
+POST        /trades/catalog/sku/:id/configure          controllers.TradesController.configureSku(id: Int)
+POST        /trades/catalog/sku/:id/adjust             controllers.TradesController.adjustSku(id: Int)
 
 ### Bounties ###
 
-GET         /bounties                              controllers.BountiesController.index
+GET         /bounties                                  controllers.BountiesController.index
 
 ### Calendar ###
 
-GET         /calendar                              controllers.CalendarController.index(month = null)
-GET         /calendar/create-note/:date            controllers.CalendarController.createNote(date)
-GET         /calendar/create-event/:date           controllers.CalendarController.createEvent(date)
-GET         /calendar/event/:id                    controllers.CalendarController.event(id: model.Snowflake)
-GET         /calendar/:month                       controllers.CalendarController.index(month)
+GET         /calendar                                  controllers.CalendarController.index(month = null)
+GET         /calendar/create-note/:date                controllers.CalendarController.createNote(date)
+GET         /calendar/create-event/:date               controllers.CalendarController.createEvent(date)
+GET         /calendar/event/:id                        controllers.CalendarController.event(id: model.Snowflake)
+GET         /calendar/:month                           controllers.CalendarController.index(month)
 
 ### DPK ###
 
-GET         /dkp                                   controllers.DkpController.index
-GET         /dkp/manage                            controllers.DkpController.manage
-GET         /dkp/manage/roster/:id                 controllers.DkpController.manageRoster(id: model.Snowflake, state: Boolean ?= false)
-GET         /dkp/manage/archived/:id               controllers.DkpController.manageArchived(id: model.Snowflake, state: Boolean ?= false)
-GET         /dkp/manage/use-decay/:id              controllers.DkpController.manageUseDecay(id: model.Snowflake, state: Boolean ?= false)
-GET         /dkp/manage/links/:id                  controllers.DkpController.manageLinks(id: model.Snowflake)
-POST        /dkp/manage/links/:id                  controllers.DkpController.manageLinksPost(id: model.Snowflake)
-GET         /dkp/manage/edit/:id                   controllers.DkpController.manageEdit(id: model.Snowflake)
-GET         /dkp/create-account                    controllers.DkpController.createAccount
-POST        /dkp/create-account                    controllers.DkpController.createAccountPost
-GET         /dkp/account/:id                       controllers.DkpController.account(id: model.Snowflake, date: Option[Long] ?= None)
-POST        /dkp/account/:id/send                  controllers.DkpController.sendAmount(id: model.Snowflake)
-GET         /dkp/create-transaction                controllers.DkpController.createTransaction
-POST        /dkp/create-transaction                controllers.DkpController.createTransactionPost
-GET         /dkp/transaction/:id                   controllers.DkpController.transaction(id: model.Snowflake)
-POST        /dkp/create-movement                   controllers.DkpController.createMovement(transaction: Option[model.Snowflake] ?= None, account: Option[model.Snowflake] ?= None)
+GET         /dkp                                       controllers.DkpController.index
+GET         /dkp/manage                                controllers.DkpController.manage
+GET         /dkp/manage/roster/:id                     controllers.DkpController.manageRoster(id: model.Snowflake, state: Boolean ?= false)
+GET         /dkp/manage/archived/:id                   controllers.DkpController.manageArchived(id: model.Snowflake, state: Boolean ?= false)
+GET         /dkp/manage/use-decay/:id                  controllers.DkpController.manageUseDecay(id: model.Snowflake, state: Boolean ?= false)
+GET         /dkp/manage/links/:id                      controllers.DkpController.manageLinks(id: model.Snowflake)
+POST        /dkp/manage/links/:id                      controllers.DkpController.manageLinksPost(id: model.Snowflake)
+GET         /dkp/manage/edit/:id                       controllers.DkpController.manageEdit(id: model.Snowflake)
+GET         /dkp/create-account                        controllers.DkpController.createAccount
+POST        /dkp/create-account                        controllers.DkpController.createAccountPost
+GET         /dkp/account/:id                           controllers.DkpController.account(id: model.Snowflake, date: Option[Long] ?= None)
+GET         /dkp/create-transaction                    controllers.DkpController.createTransaction
+POST        /dkp/create-transaction                    controllers.DkpController.createTransactionPost
+GET         /dkp/transaction/:id                       controllers.DkpController.transaction(id: model.Snowflake)
+POST        /dkp/create-movement                       controllers.DkpController.createMovement(transaction: Option[model.Snowflake] ?= None, account: Option[model.Snowflake] ?= None)
 
-GET         /dkp/batch                             controllers.DkpBatchController.batch
-GET         /dkp/batch-process                     controllers.DkpBatchController.batchProcess(url: String)
+GET         /dkp/batch                                 controllers.DkpBatchController.batch
+GET         /dkp/batch-process                         controllers.DkpBatchController.batchProcess(url: String)
 
 ### Static Assets ###
 
-GET         /assets/*file                          controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                              controllers.Assets.versioned(path="/public", file: Asset)

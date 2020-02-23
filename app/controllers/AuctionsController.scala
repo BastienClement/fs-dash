@@ -4,7 +4,7 @@ import java.time.{Instant, ZoneId}
 
 import controllers.AuctionsController.{DetailedMatch, ItemOrder}
 import db.api._
-import db.auctions.{Matches, OrderOverviews, Orders, PendingMatches}
+import db.auctions._
 import db.dkp.{AccountAccesses, Accounts, DecayConfig}
 import db.{Users, WowItems}
 import javax.inject._
@@ -40,6 +40,8 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
                   ask  <- Orders if ask.id === m.ask
                   item <- WowItems if item.id === bid.item
                 } yield (m, bid.owner, ask.owner, item)).sortBy(_._1.matched).result
+      limits               <- RollingLimits.filter(rl => rl.user === req.user.id).result.head
+      (askLimit, bidLimit) <- DecayConfig.askLimit zip DecayConfig.bidLimit
       pending <- if (req.user.isOfficer) Matches.filter(m => m.ackStatus.isEmpty).size.result
                 else DBIO.successful(0)
       gold <- WowItems.filter(i => i.id === 0).result.head
@@ -50,6 +52,9 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
           else ((OrderOverview(0, 0, None, 0, None), gold)) +: orders,
           mines,
           matches,
+          limits,
+          askLimit,
+          bidLimit,
           pending
         )
       )
@@ -83,13 +88,14 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
                  .on { case (o, u) => o.owner === u.id }
                  .result
       nextMatch <- PendingMatches.filter(m => m.item === id).sortBy(_.execution).result.headOption
+      limits    <- RollingLimits.filter(rl => rl.user === req.user.id).result.head
       tradeTax  <- DecayConfig.tradeTax
     } yield {
       optItem match {
         case None =>
           NotFound(views.html.error("Item non-trouvé", Some("Cet object n'existe pas dans la base de données.")))
         case Some(item) =>
-          Ok(views.html.auctions.item(item, req.accounts, processOrders(orders, nextMatch), tradeTax))
+          Ok(views.html.auctions.item(item, req.accounts, processOrders(orders, nextMatch), limits, tradeTax))
       }
     }
   }
@@ -149,6 +155,14 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
 
     val conflictingOffers = (!exactMatch && conflict).result
 
+    val withinRollingLimits =
+      if (guildOrder) DBIO.successful(true)
+      else
+        RollingLimits.filter(l => l.user === req.user.id).result.head.map {
+          case limit if kind == "ask" => (price * quantity) <= limit.askAvailable || (quantity == 1 && limit.askBurstable)
+          case limit if kind == "bid" => (price * quantity) <= limit.bidAvailable || (quantity == 1 && limit.bidBurstable)
+        }
+
     val validity =
       if (delay > 0)
         Instant
@@ -163,8 +177,8 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
       else
         Instant.now()
 
-    (canAccessAccount zip accountHasFunds zip conflictingOffers).flatMap {
-      case ((true, true), false) =>
+    (canAccessAccount zip accountHasFunds zip conflictingOffers zip withinRollingLimits).flatMap {
+      case (((true, true), false), true) =>
         val order = Order(
           id = Snowflake.next,
           kind = kind,
@@ -180,14 +194,18 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
           closed = None
         )
         (Orders += order) andThen DBIO.successful(Redirect(routes.AuctionsController.item(id)))
-      case (_, true) =>
+      case (((false, _), _), _) =>
+        DBIO.successful(BadRequest(views.html.error("Erreur", Some("Vous n'avez pas accès à ce compte"))))
+      case (((_, false), _), _) =>
+        DBIO.successful(BadRequest(views.html.error("Erreur", Some("Solde insufisant"))))
+      case (((_, _), true), _) =>
         DBIO.successful(
           BadRequest(views.html.error("Erreur", Some("Votre offre est trop proche d'une offre existante.")))
         )
-      case ((false, _), _) =>
-        DBIO.successful(BadRequest(views.html.error("Erreur", Some("Vous n'avez pas accès à ce compte"))))
-      case ((_, false), _) =>
-        DBIO.successful(BadRequest(views.html.error("Erreur", Some("Solde insufisant"))))
+      case (((_, _), _), false) =>
+        DBIO.successful(
+          BadRequest(views.html.error("Erreur", Some("Votre offre dépasse les limites autorisées.")))
+        )
     }
   }
 
@@ -210,10 +228,6 @@ class AuctionsController extends DashController with AuctionsController.AuctionR
       .map(m => (m.ackStatus, m.ackDate))
       .update((Some(status), Some(Instant.now)))
       .andThen(DBIO.successful(Redirect(routes.AuctionsController.pending())))
-  }
-
-  def history = DashAction.officers.async { implicit req =>
-    ???
   }
 
   private def detailedMatches: DBIOAction[Seq[DetailedMatch], NoStream, R] = {

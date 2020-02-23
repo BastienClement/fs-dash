@@ -1,0 +1,109 @@
+@(limit: model.trades.Limit, sessions: Seq[(model.trades.Session, WowItem, model.trades.Sku, model.trades.SkuStatus)], orders: Seq[(model.trades.Order, model.trades.Session, WowItem)], config: model.trades.Config)(implicit request: DashRequest[_])
+
+@layout.main("trades") {
+	<article style="flex: 1; max-width: 1000px">
+		<header>
+			<h3>Trades disponibles</h3>
+			@if(request.user.isOfficer) {
+				<a href="@routes.TradesController.catalog()" style="margin-left: 8px;"><i class="material-icons">settings_applications</i></a>
+			}
+		</header>
+		<div class="table-container">
+			<table>
+				<thead>
+					<tr>
+						<th colspan="2" class="border-right" style="width: 34%"></th>
+						<th colspan="4" class="center border-left border-right" style="width: 34%;">Vendre</th>
+						<th colspan="3" class="center border-left" style="width: 32%">Acheter</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan="2" class="right border-right" style="font-weight: 400">Limites disponibles</td>
+						<td colspan="4" class="center border-left border-right" style="font-weight: 400">@limit.askRemaining.html <span style="color: #999">/ @limit.askLimit.html</span></td>
+						<td colspan="3" class="center border-left" style="font-weight: 400">@limit.bidRemaining.html <span style="color: #999">/ @limit.bidLimit.html</span></td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th class="fit">Item</th>
+						<th class="border-right"></th>
+						<th colspan="4" class="center border-left border-right"></th>
+						<th colspan="3" class="center border-left"></th>
+					</tr>
+				</thead>
+				<tbody>
+					@for((session, item, sku, status) <- sessions) {
+						<tr style="cursor: pointer" data-link="@routes.TradesController.item(item.id)">
+							<td><span class="wh-medium-border scaled"><img src="@item.mediumIconUrl"></span></td>
+							<td class="border-right q@item.quality">@item.link</td>
+							@if(session.buyQuantity > 0) {
+								<td style="width: 15%" class="right border-left">@session.buyOrders / @session.buyQuantity</td>
+								<td style="width: 4%; color: #999" class="fit center">&cross;</td>
+								<td style="width: 7%">@session.buyPrice.html</td>
+								<td style="width: 8%" class="border-right">
+									<span style="color: #f5c635">@session.formatBuyBonus(status, config)</span>
+								</td>
+							} else {
+								<td colspan="4" style="width: 34%" class="border-right border-left center">
+									<span style="color: #999">&ndash;</span>
+								</td>
+							}
+							@if(session.sellQuantity > 0) {
+								<td style="width: 14%" class="right border-left">@session.sellOrders / @session.sellQuantity</td>
+								<td style="width: 4%; color: #999" class="fit center">&cross;</td>
+								<td style="width: 14%">@session.sellPrice.html</td>
+							} else {
+								<td colspan="3" style="width: 32%" class="border-left center">
+									<span style="color: #999">&ndash;</span>
+								</td>
+							}
+						</tr>
+					}
+					@if(sessions.isEmpty) {
+						<tr>
+							<td colspan="9" style="padding: 50px; color: #999; font-weight: 400; text-align: center; background: none !important">
+								Aucun trade disponible actuellement...
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</article>
+	<article style="flex: 0.8;">
+		<header>
+			<h3>Mes opérations</h3>
+		</header>
+		<div class="table-container">
+			<table class="tabular">
+				<thead>
+					<tr>
+						<th class="fit">Status</th>
+						<th colspan="2">Item</th>
+						<th class="fit right">Prix unit.</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					@for((order, session, item) <- orders) {
+						<tr @if(!order.closed) { data-link="@routes.TradesController.item(item.id)" style="cursor: pointer;" }>
+							<td>@order.statusText</td>
+							<td class="fit"><span class="wh-small-border scaled"><img src="@item.smallIconUrl"></span></td>
+							<td class="fit"><span class="q@item.quality">@item.link</span> &cross; @order.closeQuantity.map(q => s"$q /") @order.quantity</td>
+							<td>@session.priceForKind(order.kind).html</td>
+							<td>@order.detailsText</td>
+						</tr>
+					}
+					@if(orders.isEmpty) {
+						<tr>
+							<td colspan="5" style="padding: 20px; color: #999; font-weight: 400; background: none !important">
+								Aucune opération actuellement...
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</article>
+}

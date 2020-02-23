@@ -1,0 +1,24 @@
+@()(implicit request: DashRequest[_])
+
+@layout.main("trades") {
+	<article>
+		<header>
+			<h3>Ajout</h3>
+		</header>
+		<form>
+			<dl>
+				<dt><label for="item-id">Item ID</label></dt>
+				<dd>
+					<input id="item-id" type="text" autofocus="autofocus" cleave="item" />
+					<article id="item-output" style="display: none;">
+						<main></main>
+					</article>
+				</dd>
+			</dl>
+			<div class="actions">
+				<button id="item-create-button" disabled="disabled">Créer</button>
+			</div>
+		</form>
+	</article>
+	<script src="@routes.Assets.versioned("javascripts/dash-trades.js")" defer></script>
+}

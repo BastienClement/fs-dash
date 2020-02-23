@@ -1,0 +1,67 @@
+@(title: String, item: WowItem, kind: String, orders: Seq[(model.trades.Order, User)], curQuantity: Int, quantity: Int, price: model.dkp.DkpAmount)(implicit req: DashRequest[_])
+
+<table>
+	<thead>
+		<tr>
+			<th colspan="3" style="border-top: 0;">
+				<div style="display: flex">
+					<span style="flex: 1">@title</span>
+					@if(quantity > 0) {
+						<span style="font-weight: 300;">
+							@curQuantity / @quantity
+						</span>
+					}
+				</div>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+	@if(quantity < 1) {
+		<tr>
+			<td colspan="3" style="padding: 20px;
+				text-align: center;
+				color: #999;
+				font-weight: 400;
+				background: none !important;
+				border-bottom: none;">
+				Indisponible pour cette session
+			</td>
+		</tr>
+	} else {
+		@if(orders.isEmpty) {
+			<tr>
+				<td colspan="3" style="padding: 20px;
+					text-align: center;
+					color: #999;
+					font-weight: 400;
+					background: none !important;
+					border-bottom: none;">
+					Aucune offre pour le moment...
+				</td>
+			</tr>
+		} else {
+			@for((order, user) <- orders) {
+				<tr>
+					<td style="color: @user.color">@user.username</td>
+					<td class="fit border-right" style="padding-right: 16px;">
+						<span style="color: #999">&cross;</span>
+						@order.quantity
+					</td>
+					<td class="fit border-left center" style="padding: 4px 4px 3px 4px;">
+					@if(order.owner == req.user.id) {
+						<button data-link="@routes.TradesController.deleteOrder(item.id, kind)">
+							<i class="material-icons" style="font-size: 12px;">close</i>
+						</button>
+					}
+					</td>
+				</tr>
+			}
+			<tr class="no-hover" style="background: none;">
+				<td colspan="3" style="border: 0;
+					height: 50px;
+					border-top: 1px solid #ffffff18;"></td>
+			</tr>
+		}
+	}
+	</tbody>
+</table>

@@ -1,0 +1,100 @@
+@(item: model.WowItem, sku: model.trades.Sku, status: model.trades.SkuStatus, history: Seq[(db.trades.HistoryLine, Option[User])], configure: Form[model.trades.Sku], adjust: Form[controllers.TradesController.AdjustSku], config: model.trades.Config)(implicit request: controllers.TradesController.TradesRequest[_], messagesProvider: MessagesProvider)
+
+	@import helper._
+
+@formatPercent(value: Double) = @{
+	(value * 100).toInt + "%"
+}
+
+@layout.main("trades") {
+	<div>
+		<article>
+			<header>
+				<h3 style="display: flex">
+					<span class="wh-medium-border" style="margin-right: 8px;"><img src="@item.mediumIconUrl"/></span>
+					<span style="flex: 1">@item.link</span>
+					<div class="capsule" style="margin-right: 8px;">@status.currentSupply / @sku.targetSupply</div>
+					<div class="capsule" style="margin-right: 8px;">@status.formattedGoldPrice</div>
+				</h3>
+			</header>
+			<main>
+			@helper.form(action = routes.TradesController.configureSku(item.id)) {
+				<input type="hidden" name="@configure("item").name" value="@configure("item").value">
+				@helper.CSRF.formField
+				@inputText(configure("target_supply"), Symbol("cleave") -> "count")
+				<div style="display: flex;">
+					<div>
+						@checkbox(configure("buying"))
+						@inputText(configure("max_buy_modifier"),
+							Symbol("cleave") -> "percent",
+							Symbol("placeholder") -> formatPercent(request.config.maxBuyModifier))
+						<div class="input-unit">%</div>
+						@inputText(configure("buy_limit"),
+							Symbol("cleave") -> "count",
+							Symbol("placeholder") -> (formatPercent(request.config.defaultBuyLimit) + " (du stock cible)"))
+						<div class="input-unit">unités</div>
+					</div>
+					<div>
+						@checkbox(configure("selling"))
+						@inputText(configure("max_sell_modifier"),
+							Symbol("cleave") -> "percent",
+							Symbol("placeholder") -> formatPercent(request.config.maxSellModifier))
+						<div class="input-unit">%</div>
+						@inputText(configure("sell_limit"),
+							Symbol("cleave") -> "count",
+							Symbol("placeholder") -> (formatPercent(request.config.defaultSellLimit) + " (du stock cible)"))
+						<div class="input-unit">unités</div>
+					</div>
+				</div>
+				<div class="actions">
+					<button>Sauvegarder</button>
+				</div>
+			}
+			</main>
+		</article>
+
+		<article>
+			<header>
+				<h3>Ajustement manuel</h3>
+			</header>
+			<main>
+			@helper.form(action = routes.TradesController.adjustSku(item.id)) {
+				@helper.CSRF.formField
+				@inputText(adjust("quantity"), Symbol("cleave") -> "count-negative")
+				@inputText(adjust("label"))
+				<div class="actions">
+					<button>Appliquer</button>
+				</div>
+			}
+			</main>
+		</article>
+	</div>
+
+	<article style="flex: 1;">
+		<header>
+			<h3>Historique</h3>
+		</header>
+		<div class="table-container">
+			<table class="tabular">
+				<thead>
+					<tr>
+						<th class="fit">Date</th>
+						<th style="width: 15%">User</th>
+						<th style="width: 15%">Quantité</th>
+						<th>Label</th>
+					</tr>
+				</thead>
+				<tbody>
+				@for((line, user) <- history) {
+					<tr>
+						<td>@line.humanDate</td>
+						<td style="color: @user.map(_.color).getOrElse("inherit")">@user.map(_.username)</td>
+						<td>@line.signedQuantity</td>
+						<td>@line.label</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		</div>
+	</article>
+}

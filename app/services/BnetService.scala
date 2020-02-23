@@ -19,8 +19,8 @@ class BnetService @Inject()(conf: Configuration, ws: WSClient)(implicit ec: Exec
   private val clientId     = conf.get[String]("dash.bnet.oauth.id")
   private val clientSecret = conf.get[String]("dash.bnet.oauth.secret")
 
-  private val oauthApi = "https://eu.battle.net/oauth/token"
-  private val wowApi   = "https://eu.api.blizzard.com"
+  private val oauthApi = "https://us.battle.net/oauth/token"
+  private val wowApi   = "https://us.api.blizzard.com"
 
   private[this] var tokenPromise: Promise[String] = null
   private[this] var tokenExpire: Deadline         = Deadline.now
@@ -61,8 +61,7 @@ class BnetService @Inject()(conf: Configuration, ws: WSClient)(implicit ec: Exec
       ws.url(url)
         .withQueryStringParameters(
           "access_token" -> token,
-          "region"       -> "eu",
-          "namespace"    -> "static-classic-eu",
+          "namespace"    -> "static-classic-us",
           "locale"       -> "en_US"
         )
         .get
@@ -80,7 +79,6 @@ class BnetService @Inject()(conf: Configuration, ws: WSClient)(implicit ec: Exec
           }
           .map(i => i.split('/').last.split('.').head)
 
-        println(i.json.toString)
         Future.successful(
           WowItem(
             id,
@@ -94,6 +92,7 @@ class BnetService @Inject()(conf: Configuration, ws: WSClient)(implicit ec: Exec
         )
 
       case (i, m) if i.status == 404 || m.status == 404 =>
+        println(wowApi, i, m, token)
         Future.failed(new Exception("Item not found"))
 
       case (i, _) if i.status != 200 =>
