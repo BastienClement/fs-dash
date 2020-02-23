@@ -6,7 +6,6 @@ GET         /snowflake                                 controllers.HomeControlle
 GET         /auth/authorize                            controllers.LoginController.authorize
 GET         /auth/logout                               controllers.LoginController.logout
 
-
 ### Charter ###
 
 GET         /charter                                   controllers.CharterController.index
@@ -14,17 +13,6 @@ GET         /charter/edit                              controllers.CharterContro
 POST        /charter/edit                              controllers.CharterController.editPost(id: Option[model.Snowflake] ?= None)
 GET         /charter/move-up                           controllers.CharterController.moveUp(id: model.Snowflake)
 GET         /charter/move-down                         controllers.CharterController.moveDown(id: model.Snowflake)
-
-### Auctions ###
-
-GET         /auctions                                  controllers.AuctionsController.index
-GET         /auctions/create                           controllers.AuctionsController.create
-GET         /auctions/create/fetch-item                controllers.AuctionsController.fetchItem(id: Int)
-GET         /auctions/item/:id                         controllers.AuctionsController.item(id: Int)
-POST        /auctions/item/:id                         controllers.AuctionsController.itemPost(id: Int)
-POST        /auctions/item/:id/close/:order            controllers.AuctionsController.closeOrder(id: Int, order: model.Snowflake)
-GET         /auctions/pending                          controllers.AuctionsController.pending()
-POST        /auctions/pending/ack                      controllers.AuctionsController.ackMatching(id: model.Snowflake, status: Boolean)
 
 ### Trades ###
 
@@ -38,18 +26,6 @@ GET         /trades/catalog/fetch-item                 controllers.TradesControl
 GET         /trades/catalog/sku/:id                    controllers.TradesController.sku(id: Int)
 POST        /trades/catalog/sku/:id/configure          controllers.TradesController.configureSku(id: Int)
 POST        /trades/catalog/sku/:id/adjust             controllers.TradesController.adjustSku(id: Int)
-
-### Bounties ###
-
-GET         /bounties                                  controllers.BountiesController.index
-
-### Calendar ###
-
-GET         /calendar                                  controllers.CalendarController.index(month = null)
-GET         /calendar/create-note/:date                controllers.CalendarController.createNote(date)
-GET         /calendar/create-event/:date               controllers.CalendarController.createEvent(date)
-GET         /calendar/event/:id                        controllers.CalendarController.event(id: model.Snowflake)
-GET         /calendar/:month                           controllers.CalendarController.index(month)
 
 ### DPK ###
 
@@ -68,9 +44,6 @@ GET         /dkp/create-transaction                    controllers.DkpController
 POST        /dkp/create-transaction                    controllers.DkpController.createTransactionPost
 GET         /dkp/transaction/:id                       controllers.DkpController.transaction(id: model.Snowflake)
 POST        /dkp/create-movement                       controllers.DkpController.createMovement(transaction: Option[model.Snowflake] ?= None, account: Option[model.Snowflake] ?= None)
-
-GET         /dkp/batch                                 controllers.DkpBatchController.batch
-GET         /dkp/batch-process                         controllers.DkpBatchController.batchProcess(url: String)
 
 ### Static Assets ###
 

@@ -37,19 +37,8 @@
     <nav>
         <ul>
 					@menuItem(routes.CharterController.index, "gavel", "Charte", secure = false)
-					@*
-					@menuItem(routes.BountiesController.index, "priority_high", "Bounties")
-					@menuItem(routes.DkpController.index, "assignment_ind", "Kill on Sight")
-					*@
 					@menuItem(routes.TradesController.index, "swap_horizontal_circle", "Trades")
-					<!--@menuItem(routes.AuctionsController.index, "swap_horizontal_circle", "Auctions")-->
 					@menuItem(routes.DkpController.index, "account_balance", "DKP")
-					@*
-					@menuItem("/calendar", "event", "Calendar")
-						@menuItem("/roster", "supervisor_account", "Roster")
-						@menuItem("/dashboard", "apps")
-            @menuItem("/import", "cloud_upload")
-            *@
         </ul>
     </nav>
     @if(request.authenticated) {
