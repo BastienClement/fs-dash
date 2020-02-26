@@ -66,21 +66,38 @@ class TradesController extends DashController with TradesRequestImpl {
       .fold(_ => ???, identity)
 
     for {
-      session <- Sessions.filter(s => s.closeDate.isEmpty && s.sku === item).result.head
-      _ <- Orders += Order(
-            Snowflake.next,
-            session.id,
-            req.user.id,
-            req.account.id,
-            order.kind,
-            order.quantity,
-            closed = false,
-            None,
-            None,
-            None,
-            archived = false
-          )
-    } yield Redirect(routes.TradesController.item(item))
+      limit     <- Limits.forUser(req.user.id).result.head
+      kindLimit = if (order.kind == "bid") limit.bidRemaining else limit.askRemaining
+      session   <- Sessions.filter(s => s.closeDate.isEmpty && s.sku === item).result.head
+      kindQte   = if (order.kind == "bid") session.sellQuantity else session.buyQuantity
+      price     = (if (order.kind == "bid") session.sellPrice else session.buyPrice) * order.quantity
+      result <- if (price > kindLimit)
+                 DBIO.successful(
+                   BadRequest(views.html.error("Limite dépassée", Some("Le montant est supérieur à la limite.")))
+                 )
+               else if (order.kind == "bid" && price > req.account.available)
+                 DBIO.successful(
+                   BadRequest(views.html.error("Solde insuffisant", Some("Vous n'avez pas assez de DKP.")))
+                 )
+               else if (kindQte < 1)
+                 DBIO.successful(
+                   BadRequest(views.html.error("Ordre impossible", Some("Cet ordre ne peut être saisi.")))
+                 )
+               else
+                 (Orders += Order(
+                   Snowflake.next,
+                   session.id,
+                   req.user.id,
+                   req.account.id,
+                   order.kind,
+                   order.quantity,
+                   closed = false,
+                   None,
+                   None,
+                   None,
+                   archived = false
+                 )).map(_ => Redirect(routes.TradesController.item(item)))
+    } yield result
   }
 
   def deleteOrder(item: Int, kind: String) = TradesAction.async { implicit req =>
