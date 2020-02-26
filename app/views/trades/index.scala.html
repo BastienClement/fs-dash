@@ -97,7 +97,7 @@
 							<td>@order.statusText</td>
 							<td class="fit"><span class="wh-small-border scaled"><img src="@item.smallIconUrl"></span></td>
 							<td class="fit"><span class="q@item.quality">@item.link</span> &cross; @order.closeQuantity.map(q => s"$q /") @order.quantity</td>
-							<td>@session.priceForKind(order.kind).html</td>
+							<td>@{(session.priceForKind(order.kind) * order.decayFactor).html}</td>
 							<td>@order.detailsText</td>
 						</tr>
 					}

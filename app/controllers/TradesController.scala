@@ -95,7 +95,8 @@ class TradesController extends DashController with TradesRequestImpl {
                    None,
                    None,
                    None,
-                   archived = false
+                   archived = false,
+                   1.0
                  )).map(_ => Redirect(routes.TradesController.item(item)))
     } yield result
   }

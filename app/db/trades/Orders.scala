@@ -17,6 +17,7 @@ class Orders(tag: Tag) extends Table[Order](tag, "trades_orders") {
   def ack           = column[Option[Boolean]]("ack")
   def ackBy         = column[Option[Snowflake]]("ack_by")
   def archived      = column[Boolean]("archived")
+  def decayFactor   = column[Double]("decay_factor")
 
   def * =
     (
@@ -30,7 +31,8 @@ class Orders(tag: Tag) extends Table[Order](tag, "trades_orders") {
       closeQuantity,
       ack,
       ackBy,
-      archived
+      archived,
+      decayFactor
     ) <> (Order.tupled, Order.unapply)
 }
 

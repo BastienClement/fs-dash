@@ -14,7 +14,8 @@ case class Order(
     closeQuantity: Option[Int],
     ack: Option[Boolean],
     ackBy: Option[Snowflake],
-    archived: Boolean
+    archived: Boolean,
+    decayFactor: Double
 ) {
   def statusText: Html = (kind, closed, ack) match {
     case (_, _, Some(false)) => Html("<span class='class-11'>Annulé</span>")
