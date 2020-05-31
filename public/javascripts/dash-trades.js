@@ -67,7 +67,7 @@ $("form[data-kind]").each(function (_, form) {
 			}
 
 			var balance = window["trades_account_balance"];
-			if (total > balance) {
+			if (kind === "bid" && total > balance) {
 				$error.html("Le montant total (" + formatAmount(total) + ") est supérieur à votre solde de DKP (" + formatAmount(balance) + ").").show();
 				return;
 			}
@@ -79,7 +79,7 @@ $("form[data-kind]").each(function (_, form) {
 	$quantity.on("keyup", update);
 });
 
-$("[data-order] button[data-action]").on("click", function(e) {
+$("[data-order] button[data-action]").on("click", function (e) {
 	e.preventDefault();
 	e.stopImmediatePropagation();
 
