@@ -5,7 +5,9 @@ volumes:
 
 services:
   db:
-    image: postgres:11-alpine
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_PASSWORD: docker
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:

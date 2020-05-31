@@ -1,7 +1,7 @@
 name := "dash"
 version := "1.0"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.2"
 
 lazy val `dash` = (project in file(".")).enablePlugins(PlayScala)
 
@@ -12,14 +12,13 @@ libraryDependencies ++= Seq(
   ehcache,
   ws,
   guice,
-  "org.scala-lang.modules"   %% "scala-xml"                % "1.2.0",
-  "com.typesafe.play"        %% "play-slick"               % "4.0.2",
-  "com.typesafe.play"        %% "play-slick-evolutions"    % "4.0.2",
-  "com.github.tminglei"      %% "slick-pg"                 % "0.18.0",
-  "com.github.tminglei"      %% "slick-pg_play-json"       % "0.18.0",
-  "com.atlassian.commonmark" % "commonmark"                % "0.13.0",
-  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.13.0",
-  "com.google.cloud"         % "google-cloud-vision"       % "1.97.0"
+  "org.scala-lang.modules"   %% "scala-xml"                % "1.3.0",
+  "com.typesafe.play"        %% "play-slick"               % "5.0.0",
+  "com.typesafe.play"        %% "play-slick-evolutions"    % "5.0.0",
+  "com.github.tminglei"      %% "slick-pg"                 % "0.19.0",
+  "com.github.tminglei"      %% "slick-pg_play-json"       % "0.19.0",
+  "com.atlassian.commonmark" % "commonmark"                % "0.15.1",
+  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.15.1"
 )
 
 pipelineStages := Seq(digest, gzip)
@@ -37,3 +36,11 @@ packageName := "fs-dash"
 dockerBaseImage := "openjdk:11-slim"
 dockerUsername := Some("galedric")
 dockerUpdateLatest := true
+
+javaOptions in Runtime ++= Seq(
+  "DISCORD_OAUTH_SECRET",
+  "DISCORD_BOT_TOKEN",
+  "BNET_OAUTH_SECRET"
+).map(key => key -> sys.env.get(key)).collect {
+  case (key, Some(value)) => s"-D$key=$value"
+}
