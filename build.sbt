@@ -1,5 +1,5 @@
 name := "dash"
-version := "1.0"
+version := "1.1.0"
 
 scalaVersion := "2.13.2"
 
@@ -31,10 +31,9 @@ TwirlKeys.templateImports ++= Seq(
 
 enablePlugins(DockerPlugin)
 
-packageName := "fs-dash"
-
 dockerBaseImage := "openjdk:11-slim"
-dockerUsername := Some("galedric")
+dockerRepository := Some("eu.gcr.io/fromscratchgg")
+packageName := "dash"
 dockerUpdateLatest := true
 
 javaOptions in Runtime ++= Seq(
