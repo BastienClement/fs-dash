@@ -24,9 +24,9 @@
 			@helper.form(action = routes.TradesController.configureSku(item.id)) {
 				<input type="hidden" name="@configure("item").name" value="@configure("item").value">
 				@helper.CSRF.formField
-				@inputText(configure("target_supply"), Symbol("cleave") -> "count")
 				<div style="display: flex;">
 					<div>
+						@inputText(configure("target_supply"), Symbol("cleave") -> "count")
 						@checkbox(configure("buying"))
 						@inputText(configure("max_buy_modifier"),
 							Symbol("cleave") -> "percent",
@@ -38,6 +38,7 @@
 						<div class="input-unit">unités</div>
 					</div>
 					<div>
+						@inputText(configure("gold_price"), Symbol("cleave") -> "count")
 						@checkbox(configure("selling"))
 						@inputText(configure("max_sell_modifier"),
 							Symbol("cleave") -> "percent",

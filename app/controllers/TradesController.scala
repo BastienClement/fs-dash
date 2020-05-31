@@ -243,17 +243,19 @@ object TradesController {
       "buying"            -> boolean,
       "selling"           -> boolean,
       "target_supply"     -> number(min = 0),
+      "gold_price"        -> optional(number(min = 0)),
       "max_buy_modifier"  -> optional(percentage),
       "max_sell_modifier" -> optional(percentage),
       "buy_limit"         -> optional(number(min = 0)),
       "sell_limit"        -> optional(number(min = 0))
-    )(Sku(_, _, _, _, _, _, _, _)) { sku =>
+    )(Sku(_, _, _, _, _, _, _, _, _)) { sku =>
       Some(
         (
           sku.item,
           sku.buying,
           sku.selling,
           sku.targetSupply,
+          sku.goldPrice,
           sku.maxBuyModifier,
           sku.maxSellModifier,
           sku.buyLimit,

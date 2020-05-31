@@ -5,6 +5,7 @@ case class Sku(
     buying: Boolean,
     selling: Boolean,
     targetSupply: Int,
+    goldPrice: Option[Int],
     maxBuyModifier: Option[Double],
     maxSellModifier: Option[Double],
     buyLimit: Option[Int],
@@ -12,5 +13,5 @@ case class Sku(
 )
 
 object Sku {
-  def default(item: Int): Sku = Sku(item, buying = true, selling = true, 0, None, None, None, None)
+  def default(item: Int): Sku = Sku(item, buying = true, selling = true, 0, None, None, None, None, None)
 }

@@ -24,6 +24,7 @@ class Skus(tag: Tag) extends Table[Sku](tag, "trades_skus") {
       buying,
       selling,
       targetSupply,
+      goldPrice,
       maxBuyModifier,
       maxSellModifier,
       buyLimit,
