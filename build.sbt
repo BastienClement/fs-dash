@@ -1,5 +1,5 @@
 name := "dash"
-version := "1.1.0"
+version := "1.2.0"
 
 scalaVersion := "2.13.2"
 
@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   "com.github.tminglei"      %% "slick-pg"                 % "0.19.0",
   "com.github.tminglei"      %% "slick-pg_play-json"       % "0.19.0",
   "com.atlassian.commonmark" % "commonmark"                % "0.15.1",
-  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.15.1"
+  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.15.1",
+  "com.google.cloud.sql"     % "postgres-socket-factory"   % "1.0.16"
 )
 
 pipelineStages := Seq(digest, gzip)
