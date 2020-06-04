@@ -34,6 +34,7 @@ body > header {
 			margin-bottom: $padding;
 
 			background: url("/assets/images/logo.png") no-repeat;
+			background: var(--url-logo) no-repeat;
 			background-size: contain;
 		}
 	}

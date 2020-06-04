@@ -19,9 +19,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
 
 <title>From Scratch</title>
+
+<style>
+	:root {
+		--url-logo: url("@routes.Assets.versioned("images/logo.png")");
+		--url-border-medium: url("@routes.Assets.versioned("images/border-medium.png")");
+		--url-border-large: url("@routes.Assets.versioned("images/border-large.png")");
+		--url-logo: url("@routes.Assets.versioned("images/logo.png")");
+	}
+</style>
+
+@layout.fonts()
+
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="@routes.Assets.versioned("stylesheets/dash.css")" rel="stylesheet">
-<link href="@routes.Assets.versioned("fonts/stylesheet.css")" rel="stylesheet">
 
 <script>var whTooltips = { colorLinks: true, iconizeLinks: true, renameLinks: true };</script>
 <script src="https://wow.zamimg.com/widgets/power.js" defer></script>
