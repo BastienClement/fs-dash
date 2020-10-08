@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class DiscordService @Inject()(conf: Configuration, ws: WSClient)(implicit ec: ExecutionContext) {
 
-  private val discordApi   = "https://discordapp.com/api"
+  private val discordApi   = "https://discord.com/api"
   private val clientId     = conf.get[String]("dash.discord.oauth.id")
   private val clientSecret = conf.get[String]("dash.discord.oauth.secret")
   private val botToken     = conf.get[String]("dash.discord.bot.token")
